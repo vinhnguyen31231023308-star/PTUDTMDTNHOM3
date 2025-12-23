@@ -1,0 +1,84 @@
+@model HairNovaShop.Models.User
+@{
+    ViewData["Title"] = "Chỉnh sửa người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header">
+    <h1>Chỉnh sửa người dùng</h1>
+    <p>Cập nhật thông tin người dùng #@Model.Id</p>
+</div>
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">Thông tin người dùng</h2>
+    </div>
+    <form asp-action="EditUser" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Username" class="form-label">Tên đăng nhập <span class="text-danger">*</span></label>
+                <input asp-for="Username" class="form-control" required />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input asp-for="Email" type="email" class="form-control" required />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="FullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                <input asp-for="FullName" class="form-control" required />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                <input asp-for="Phone" class="form-control" required />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                <input type="password" name="newPassword" id="newPassword" class="form-control" minlength="6" />
+                <small class="form-text text-muted">Để trống nếu không muốn đổi mật khẩu</small>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Role" class="form-label">Vai trò <span class="text-danger">*</span></label>
+                <select asp-for="Role" class="form-select" required>
+                    <option value="0">Người dùng</option>
+                    <option value="1">Quản trị viên</option>
+                </select>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ngày tạo</label>
+            <input type="text" value="@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")" class="form-control" readonly />
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn admin-btn-primary">
+                <i class="fas fa-save me-2"></i>Cập nhật
+            </button>
+            <a asp-action="Users" class="btn btn-secondary">
+                <i class="fas fa-times me-2"></i>Hủy
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-label {
+        font-weight: 500;
+        color: var(--admin-text);
+        margin-bottom: 0.5rem;
+    }
+</style>

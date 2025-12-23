@@ -1,0 +1,40 @@
+@model HairNovaShop.Models.Product
+
+<div class="product-card" data-id="@Model.Id">
+    <button class="product-wishlist-btn wishlist-btn" type="button" aria-label="Yêu thích" data-product-id="@Model.Id" onclick="try { if(typeof window.toggleWishlist === 'function') { window.toggleWishlist(@Model.Id, this); } else { console.error('toggleWishlist not available'); } } catch(e) { console.error('Error calling toggleWishlist:', e); } return false;">
+        <i class="fa-regular fa-heart"></i>
+    </button>
+
+    <div class="product-image-wrapper">
+        @if (!string.IsNullOrEmpty(Model.MainImage))
+        {
+            <img src="@Model.MainImage" alt="@Model.Name">
+        }
+        else
+        {
+            <img src="/images/placeholder.png" alt="@Model.Name">
+        }
+        <div class="product-overlay-actions">
+            <button class="product-overlay-btn secondary" type="button" onclick="event.preventDefault(); addToCart(@Model.Id);">Thêm vào giỏ hàng</button>
+            <button class="product-overlay-btn primary" type="button" onclick="event.preventDefault(); buyNow(@Model.Id);">Mua ngay</button>
+        </div>
+    </div>
+
+    <a asp-controller="Product" asp-action="Detail" asp-route-id="@Model.Id" class="product-link">
+        <div class="product-meta-row">
+            <span class="product-rating">
+                <span class="star">★</span> @(Model.Rating > 0 ? Model.Rating.ToString("F1") : "5.0")
+            </span>
+            <span class="product-sold">Đã bán @(Model.ReviewCount > 0 ? Model.ReviewCount : 0)</span>
+        </div>
+        <h4 class="product-name">@Model.Name</h4>
+        <div class="product-price-row">
+            <span class="product-price-current">@Model.Price.ToString("N0") đ</span>
+            @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+            {
+                <span class="product-price-old">@Model.OriginalPrice.Value.ToString("N0") đ</span>
+                <span class="product-discount-badge">-@Math.Round((1 - (double)Model.Price / (double)Model.OriginalPrice.Value) * 100)%</span>
+            }
+        </div>
+    </a>
+</div>

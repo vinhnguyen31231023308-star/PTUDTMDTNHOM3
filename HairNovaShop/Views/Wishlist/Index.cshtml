@@ -1,0 +1,273 @@
+@model List<HairNovaShop.Models.Wishlist>
+@{
+    ViewData["Title"] = "Sản phẩm yêu thích";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/wishlist.css" asp-append-version="true" />
+}
+
+<main class="wishlist-page">
+    <!-- DANH SÁCH YÊU THÍCH -->
+    <section class="wishlist-section">
+        <h2 class="section-title">
+            DANH SÁCH YÊU THÍCH <span class="wishlist-count">(@Model.Count sản phẩm)</span>
+        </h2>
+
+        @if (Model.Any())
+        {
+            <div class="wishlist-table" id="wishlistTable">
+                <div class="wishlist-header-row">
+                    <div class="w-col w-col-product">Sản phẩm</div>
+                    <div class="w-col w-col-date">Ngày thêm</div>
+                    <div class="w-col w-col-status">Trạng thái</div>
+                    <div class="w-col w-col-price">Đơn giá</div>
+                    <div class="w-col w-col-actions"></div>
+                </div>
+
+                @foreach (var item in Model)
+                {
+                    var product = item.Product;
+                    if (product == null) continue;
+
+                    // Parse StockByCapacity JSON to determine stock and price
+                    var variantsJson = product.StockByCapacity ?? "[]";
+                    var variants = new List<Dictionary<string, object>>();
+                    try
+                    {
+                        variants = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(variantsJson) ?? new List<Dictionary<string, object>>();
+                    }
+                    catch { }
+
+                    var hasVariants = variants.Any();
+
+                    // Determine stock from variants if any, otherwise use product.Stock
+                    var hasStock = hasVariants
+                        ? variants.Any(v => int.TryParse(v?.GetValueOrDefault("Stock")?.ToString(), out var s) && s > 0)
+                        : product.Stock > 0;
+
+                    // Determine minimum price from variants if provided, else fall back to product price
+                    var variantPrices = variants
+                        .Select(v =>
+                        {
+                            var priceObj = v?.GetValueOrDefault("Price");
+                            var priceStr = priceObj?.ToString();
+                            return decimal.TryParse(priceStr, out var parsed) ? (decimal?)parsed : null;
+                        })
+                        .Where(p => p.HasValue)
+                        .Select(p => p!.Value)
+                        .ToList();
+
+                    var minPrice = variantPrices.Any() ? variantPrices.Min() : product.Price;
+                    
+                    <div class="wishlist-row" data-product-id="@product.Id">
+                        <div class="w-col w-col-product">
+                            @if (!string.IsNullOrEmpty(product.MainImage))
+                            {
+                                <img src="@product.MainImage" alt="@product.Name" class="w-thumb" onerror="this.src='/images/placeholder.png'" />
+                            }
+                            else
+                            {
+                                <div class="w-thumb" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                            }
+                            <div class="w-prod-info">
+                                <div class="w-prod-brand">@(product.Category?.Name ?? "HairNova")</div>
+                                <a asp-controller="Product" asp-action="Detail" asp-route-id="@product.Id" class="w-prod-name">@product.Name</a>
+                            </div>
+                        </div>
+                        <div class="w-col w-col-date">
+                            <span class="w-date">@item.AddedAt.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="w-col w-col-status">
+                            @if (hasStock)
+                            {
+                                <span class="w-status w-status-instock">Còn hàng</span>
+                            }
+                            else
+                            {
+                                <span class="w-status w-status-outstock">Hết hàng</span>
+                            }
+                        </div>
+                        <div class="w-col w-col-price">
+                            <span class="w-price">@minPrice.ToString("N0") đ</span>
+                        </div>
+                        <div class="w-col w-col-actions">
+                            <a asp-controller="Product" asp-action="Detail" asp-route-id="@product.Id" class="w-btn-outline">
+                                Xem chi tiết
+                            </a>
+                            @if (hasStock)
+                            {
+                                <button class="w-btn-primary btn-add-cart" onclick="addToCartFromWishlist(@product.Id)">
+                                    Thêm vào giỏ
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="w-btn-primary" disabled>
+                                    <i class="fas fa-shopping-cart"></i> Hết hàng
+                                </button>
+                            }
+                            <button class="w-btn-icon btn-remove" onclick="removeFromWishlist(@product.Id, this)" title="Xóa khỏi yêu thích">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="wishlist-empty">
+                <i class="far fa-heart"></i>
+                <h3>Danh sách yêu thích trống</h3>
+                <p>Bạn chưa có sản phẩm yêu thích nào. Hãy khám phá cửa hàng và thêm sản phẩm vào danh sách!</p>
+                <a asp-controller="Shop" asp-action="Index" class="btn-shop">
+                    <i class="fas fa-store me-2"></i>Khám phá cửa hàng
+                </a>
+            </div>
+        }
+    </section>
+</main>
+
+<!-- Service Strip -->
+<section class="service-strip">
+    <div class="service-grid">
+        <div class="service-item">
+            <img src="~/images/imgwishlist/sb1.png" alt="Thanh toán khi nhận hàng" onerror="this.style.display='none'" />
+            <p>THANH TOÁN KHI NHẬN HÀNG</p>
+        </div>
+        <div class="service-item">
+            <img src="~/images/imgwishlist/sb2.png" alt="Giao nhanh miễn phí" onerror="this.style.display='none'" />
+            <p>GIAO HÀNG MIỄN PHÍ</p>
+        </div>
+        <div class="service-item">
+            <img src="~/images/imgwishlist/sb3.png" alt="30 ngày đổi trả miễn phí" onerror="this.style.display='none'" />
+            <p>30 NGÀY ĐỔI TRẢ MIỄN PHÍ</p>
+        </div>
+        <div class="service-item">
+            <img src="~/images/imgwishlist/sb4.png" alt="Thương hiệu uy tín" onerror="this.style.display='none'" />
+            <p>THƯƠNG HIỆU UY TÍN TOÀN CẦU</p>
+        </div>
+    </div>
+</section>
+
+<!-- Bottom Strip -->
+<section class="wishlist-bottom-strip">
+    <div class="bottom-strip-grid">
+        <div class="bottom-box">
+            <p class="bottom-title">HOTLINE CSKH</p>
+            <p class="bottom-main">0343-018-741</p>
+            <p class="bottom-sub">Miễn phí cước gọi</p>
+        </div>
+        <div class="bottom-box">
+            <p class="bottom-title">TÌM CHI NHÁNH</p>
+            <p class="bottom-main">HỆ THỐNG HAIRNOVA</p>
+            <p class="bottom-sub">Xem địa chỉ cửa hàng gần bạn</p>
+        </div>
+    </div>
+</section>
+
+<!-- Toast Container -->
+<div id="wishlistToast" class="wishlist-toast">
+    <i class="fas fa-heart"></i>
+    <div class="wishlist-toast-content">
+        <div class="wishlist-toast-title">Thông báo</div>
+        <div class="wishlist-toast-message"></div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/js/shop.js" asp-append-version="true"></script>
+<script src="~/js/wishlist.js" asp-append-version="true"></script>
+<script>
+    // Remove from wishlist
+    async function removeFromWishlist(productId, btn) {
+        try {
+            const response = await fetch('/Wishlist/Remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `productId=${productId}`
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Remove the row with animation
+                const row = btn.closest('.wishlist-row');
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(50px)';
+                
+                setTimeout(() => {
+                    row.remove();
+                    updateWishlistCount();
+                    
+                    // Check if empty
+                    const rows = document.querySelectorAll('.wishlist-row');
+                    if (rows.length === 0) {
+                        location.reload();
+                    }
+                }, 300);
+                
+                showWishlistToast('removed', 'Đã xóa', result.message);
+                
+                // Update header badge
+                updateHeaderWishlistBadge(result.count);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+    
+    // Update count display
+    function updateWishlistCount() {
+        const rows = document.querySelectorAll('.wishlist-row');
+        const countSpan = document.querySelector('.wishlist-count');
+        if (countSpan) {
+            countSpan.textContent = `(${rows.length} sản phẩm)`;
+        }
+    }
+    
+    // Add to cart from wishlist
+    function addToCartFromWishlist(productId) {
+        // Sử dụng cùng logic thêm giỏ hàng như trang /Shop (xử lý dung tích nếu có)
+        if (typeof addToCart === 'function') {
+            addToCart(productId);
+        } else {
+            window.location.href = `/Product/Detail/${productId}`;
+        }
+    }
+    
+    // Show toast notification
+    function showWishlistToast(type, title, message) {
+        const toast = document.getElementById('wishlistToast');
+        const toastTitle = toast.querySelector('.wishlist-toast-title');
+        const toastMessage = toast.querySelector('.wishlist-toast-message');
+        const icon = toast.querySelector('i');
+        
+        toast.classList.remove('added', 'removed', 'show');
+        toast.classList.add(type);
+        
+        icon.className = type === 'added' ? 'fas fa-heart' : 'fas fa-heart-broken';
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    
+    // Update header wishlist badge
+    function updateHeaderWishlistBadge(count) {
+        const badge = document.querySelector('.wishlist-badge');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+</script>
+}

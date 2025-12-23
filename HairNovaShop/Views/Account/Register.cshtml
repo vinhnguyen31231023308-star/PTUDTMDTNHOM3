@@ -1,0 +1,123 @@
+@model HairNovaShop.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewData["Title"] - HairNovaShop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="~/css/head.css" />
+    <link rel="stylesheet" href="~/css/account.css" />
+</head>
+<body>
+    <!-- Header (Partial View) -->
+    @await Html.PartialAsync("_Header")
+
+    <!-- Nền bong bóng -->
+    <div class="bg-bubbles">
+        <span class="bubble b1"></span>
+        <span class="bubble b2"></span>
+        <span class="bubble b3"></span>
+        <span class="bubble b4"></span>
+        <span class="bubble b5"></span>
+        <span class="bubble b6"></span>
+    </div>
+
+    <!-- Layout hai bên -->
+    <div class="register-layout">
+        <!-- Panel trái -->
+        <section class="register-left-panel">
+            <div class="blob-layer">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+                <div class="blob blob-3"></div>
+            </div>
+            <div class="register-left-inner">
+                <div class="register-logo">
+                    <img src="~/images/logo.png" alt="Hairnova" class="register-logo-img" />
+                </div>
+                <h2 class="register-heading">Chào mừng bạn đến với Hairnova</h2>
+                <p class="register-desc">
+                    Tạo tài khoản để đặt lịch, theo dõi lịch sử dịch vụ và nhận
+                    ưu đãi chăm sóc tóc được cá nhân hoá cho riêng bạn.
+                </p>
+            </div>
+        </section>
+
+        <!-- Card form bên phải -->
+        <section class="auth-card auth-card-register">
+            <h1 class="auth-title">Đăng ký</h1>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+
+            <form class="auth-form" asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="auth-input-group">
+                    <label asp-for="FullName">Họ và tên</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" asp-for="FullName" placeholder="Nhập họ và tên" required />
+                    </div>
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                <div class="auth-input-group">
+                    <label asp-for="Phone">Số điện thoại</label>
+                    <div class="auth-input-wrapper">
+                        <input type="tel" asp-for="Phone" placeholder="Nhập số điện thoại" required />
+                    </div>
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+
+                <div class="auth-input-group">
+                    <label asp-for="Email">Email</label>
+                    <div class="auth-input-wrapper">
+                        <input type="email" asp-for="Email" placeholder="Nhập email" required />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="auth-input-group">
+                    <label asp-for="Password">Mật khẩu</label>
+                    <div class="auth-input-wrapper">
+                        <input type="password" asp-for="Password" placeholder="Nhập mật khẩu" required />
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="auth-input-group">
+                    <label asp-for="ConfirmPassword">Xác nhận mật khẩu</label>
+                    <div class="auth-input-wrapper">
+                        <input type="password" asp-for="ConfirmPassword" placeholder="Nhập lại mật khẩu" required />
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="auth-btn">
+                    Tạo tài khoản
+                </button>
+
+                <div class="auth-footer" style="margin-top: 16px;">
+                    <span>Đã có tài khoản?</span>
+                    <a asp-action="Login" class="auth-link-highlight">Đăng nhập ngay</a>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/head.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

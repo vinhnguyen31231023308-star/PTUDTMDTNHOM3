@@ -1,0 +1,195 @@
+@model List<HairNovaShop.Models.Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header">
+    <h1>Quản lý sản phẩm</h1>
+    <p>Danh sách tất cả sản phẩm trong hệ thống</p>
+</div>
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">Danh sách sản phẩm</h2>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="input-group" style="width: 300px;">
+                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Tìm tên sản phẩm, danh mục...">
+            </div>
+            <a asp-action="CreateProduct" class="btn admin-btn-primary">
+                <i class="fas fa-plus me-2"></i>Thêm sản phẩm mới
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Giá</th>
+                    <th>Tồn kho</th>
+                    <th>Đánh giá</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>@product.Id</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(product.MainImage))
+                                {
+                                    <img src="@product.MainImage" alt="@product.Name" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                }
+                                else
+                                {
+                                    <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <strong>@product.Name</strong>
+                                @if (product.IsFeatured)
+                                {
+                                    <span class="badge bg-warning ms-1">Nổi bật</span>
+                                }
+                                @if (product.IsNew)
+                                {
+                                    <span class="badge bg-info ms-1">Mới</span>
+                                }
+                                @if (product.OnSale)
+                                {
+                                    <span class="badge bg-danger ms-1">Giảm giá</span>
+                                }
+                            </td>
+                            <td>@(product.Category?.Name ?? "-")</td>
+                            <td>
+                                <strong>@product.Price.ToString("N0")đ</strong>
+                                @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
+                                {
+                                    <br><small class="text-muted"><del>@product.OriginalPrice.Value.ToString("N0")đ</del></small>
+                                }
+                            </td>
+                            <td>
+                                @if (product.Stock > 0)
+                                {
+                                    <span class="badge bg-success">@product.Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Hết hàng</span>
+                                }
+                            </td>
+                            <td>
+                                @if (product.Rating > 0)
+                                {
+                                    <div>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <strong>@product.Rating.ToString("F1")</strong>
+                                        <small class="text-muted">(@product.ReviewCount)</small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa có đánh giá</span>
+                                }
+                            </td>
+                            <td>
+                                @if (product.IsActive)
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Tạm dừng</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="EditProduct" asp-route-id="@product.Id" class="btn btn-sm btn-primary" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form asp-action="DeleteProduct" asp-route-id="@product.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác!');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center">Không có sản phẩm nào</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        let hasData = false;
+        
+        tableRows.forEach(row => {
+            // Skip the "no data" row
+            if (row.querySelector('td[colspan]')) {
+                return;
+            }
+            hasData = true;
+            
+            const productName = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+            const category = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '';
+            const id = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+            
+            const matchesSearch = productName.includes(searchTerm) || 
+                                  category.includes(searchTerm) ||
+                                  id.includes(searchTerm);
+            
+            if (matchesSearch) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        const noResultsRow = document.getElementById('noResultsRow');
+        if (visibleCount === 0 && hasData) {
+            if (!noResultsRow) {
+                const tbody = document.querySelector('tbody');
+                const newRow = document.createElement('tr');
+                newRow.id = 'noResultsRow';
+                newRow.innerHTML = '<td colspan="9" class="text-center py-4 text-muted"><i class="fas fa-search me-2"></i>Không tìm thấy sản phẩm phù hợp</td>';
+                tbody.appendChild(newRow);
+            }
+        } else if (noResultsRow) {
+            noResultsRow.remove();
+        }
+    }
+    
+    searchInput.addEventListener('input', filterTable);
+});
+</script>
+}

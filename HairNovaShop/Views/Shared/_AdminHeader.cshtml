@@ -1,0 +1,64 @@
+<!-- Admin Header -->
+<header class="admin-header">
+    <div class="admin-header-content">
+        <div class="admin-header-left">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a asp-controller="Admin" asp-action="Index" class="admin-logo">
+                <img src="~/images/logo.png" alt="Logo HairNova" style="width: 180px; height: auto;">
+            </a>
+        </div>
+        <div class="admin-header-right">
+            <div class="admin-header-actions">
+                <a asp-controller="Home" asp-action="Index" class="btn-header-link btn-header-icon" title="Về trang chủ">
+                    <i class="fas fa-home"></i>
+                    <span class="btn-text">Trang chủ</span>
+                </a>
+                
+                <div class="admin-user-dropdown">
+                    @{
+                        var userId = Context.Session.GetString("UserId");
+                        var fullName = Context.Session.GetString("FullName");
+                        var username = Context.Session.GetString("Username");
+                        var userInitials = !string.IsNullOrEmpty(fullName) 
+                            ? string.Join("", fullName.Split(' ').Take(2).Select(n => n[0]).ToArray())
+                            : username?.Substring(0, Math.Min(2, username.Length)).ToUpper() ?? "AD";
+                    }
+                    <button class="admin-user-btn" id="adminUserBtn" title="Tài khoản">
+                        <div class="admin-user-avatar">
+                            <span>@userInitials</span>
+                        </div>
+                        <div class="admin-user-info">
+                            <span class="admin-user-name">@(string.IsNullOrEmpty(fullName) ? username : fullName)</span>
+                            <span class="admin-user-role">Quản trị viên</span>
+                        </div>
+                        <i class="fas fa-chevron-down admin-user-chevron"></i>
+                    </button>
+                    <ul class="admin-dropdown-menu" id="adminUserDropdown">
+                        <li>
+                            <a asp-controller="Admin" asp-action="Profile">
+                                <i class="fas fa-user"></i>
+                                <span>Thông tin tài khoản</span>
+                            </a>
+                        </li>
+                        <li class="dropdown-divider"></li>
+                        <li>
+                            <a asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-store"></i>
+                                <span>Về cửa hàng</span>
+                            </a>
+                        </li>
+                        <li class="dropdown-divider"></li>
+                        <li>
+                            <a asp-controller="Account" asp-action="Logout" class="dropdown-item-logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Đăng xuất</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

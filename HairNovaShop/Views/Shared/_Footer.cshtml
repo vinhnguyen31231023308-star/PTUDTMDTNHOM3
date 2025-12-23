@@ -1,0 +1,72 @@
+<footer class="footer-verb-style">
+    <div class="container pt-5 pb-4">
+        <div class="row">
+            <div class="col-lg-4 col-md-12 mb-5 mb-lg-0">
+                <h2 class="footer-heading mb-3">Kết nối với HairNova</h2>
+                <div class="footer-message-box">
+                    <p>"Vẻ đẹp thực sự bắt nguồn từ sự thấu hiểu và trân trọng bản thân. Hãy để HairNova đồng hành cùng mái tóc bạn."</p>
+                </div>
+                <div class="footer-socials mt-4">
+                    <a href="#" class="social-circle"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" class="social-circle"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-circle"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-circle"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-8 col-md-12">
+                <div class="row">
+                    <div class="col-md-4 col-6 mb-4">
+                        <h5 class="link-heading">Cửa hàng</h5>
+                        <ul class="footer-links">
+                            @await Component.InvokeAsync("FooterCategories")
+                        </ul>
+                    </div>
+                    <div class="col-md-4 col-6 mb-4">
+                        <h5 class="link-heading">Hỗ trợ</h5>
+                        <ul class="footer-links">
+                            <li><a href="#">Chính sách thanh toán</a></li>
+                            <li><a href="#">Chính sách bảo hành và đổi trả</a></li>
+                            <li><a href="#">Chính sách bảo mật</a></li>
+                            <li><a href="#">Chính sách vận chuyển</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 col-6 mb-4">
+                        <h5 class="link-heading">Liên hệ</h5>
+                        <ul class="footer-links">
+                            <li><a href="#">🗺️ 279 Nguyễn Tri Phương, Quận 10</a></li>
+                            <li><a href="#">📞 0387 211 431</a></li>
+                            <li><a href="#">📩 hairnova@gmail.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="waves-container">
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+             viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+            <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+            </defs>
+            <g class="parallax">
+                <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(0, 75, 176, 0.3)" />
+                <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(0, 75, 176, 0.5)" />
+                <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(0, 75, 176, 0.7)" />
+                <use xlink:href="#gentle-wave" x="48" y="7" fill="var(--bs-primary-dark)" />
+            </g>
+        </svg>
+    </div>
+
+    <div class="footer-bottom-dark">
+        <div class="container text-center">
+            <div class="big-brand-box">
+                <img src="~/images/LOGO4.png" alt="HairNova Logo" class="footer-brand-img">
+            </div>
+            <div class="copyright-text mt-4">
+                &copy; 2025 HAIRNOVA VIETNAM | ALL RIGHTS RESERVED
+            </div>
+        </div>
+    </div>
+</footer>

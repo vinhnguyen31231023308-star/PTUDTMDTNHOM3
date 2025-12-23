@@ -1,0 +1,743 @@
+@model HairNovaShop.Models.Product
+@{
+    ViewData["Title"] = Model.Name + " - HairNovaShop";
+    var imageList = new List<string>();
+    if (!string.IsNullOrEmpty(Model.Images))
+    {
+        try
+        {
+            imageList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(Model.Images) ?? new List<string>();
+        }
+        catch { }
+    }
+    if (!string.IsNullOrEmpty(Model.MainImage) && !imageList.Contains(Model.MainImage))
+    {
+        imageList.Insert(0, Model.MainImage);
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/detail.css" asp-append-version="true" />
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">Cửa Hàng</h1>
+        <div class="breadcrumb">
+            <a asp-controller="Home" asp-action="Index">Trang Chủ</a> / <a asp-controller="Shop" asp-action="Index">Cửa Hàng</a> / <span>@Model.Name</span>
+        </div>
+    </div>
+</section>
+
+<section class="product-detail-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5 gallery-container">
+                <div class="main-image-box">
+                    <button class="gallery-nav-btn prev" onclick="changeImage(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <img id="mainImg" src="@(imageList.Any() ? imageList[0] : "/images/placeholder.png")" alt="@Model.Name">
+                    <button class="gallery-nav-btn next" onclick="changeImage(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                @if (imageList.Count > 1)
+                {
+                    <div class="thumb-list">
+                        @for (int i = 0; i < imageList.Count; i++)
+                        {
+                            <div class="thumb-item @(i == 0 ? "active" : "")" onclick="changeImageTo(@i)">
+                                <img src="@imageList[i]" alt="Thumbnail @(i + 1)">
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="col-lg-7 product-info-col">
+                <span class="p-cat">@(Model.Category?.Name ?? "Sản phẩm")</span>
+                <h2 class="p-title">
+                    @Model.Name
+                    @if (Model.Stock > 0)
+                    {
+                        <span class="stock-badge">Còn hàng</span>
+                    }
+                    else
+                    {
+                        <span class="stock-badge" style="background: #e74c3c;">Hết hàng</span>
+                    }
+                </h2>
+
+                @if (Model.Rating > 0)
+                {
+                    <div class="p-rating">
+                        <div class="stars">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <i class="fa-solid fa-star @(i < (int)Model.Rating ? "" : "text-muted")"></i>
+                            }
+                        </div>
+                        <span>@Model.Rating.ToString("F1") (@Model.ReviewCount Đánh Giá)</span>
+                    </div>
+                }
+
+                <div class="p-price" id="productPrice">
+                    @Model.Price.ToString("N0")đ
+                    @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+                    {
+                        <del>@Model.OriginalPrice.Value.ToString("N0")đ</del>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="p-desc">@Model.Description</p>
+                }
+
+                @{
+                    var variantsJson = Model.StockByCapacity ?? "[]";
+                    var variants = new List<Dictionary<string, object>>();
+                    try
+                    {
+                        variants = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(variantsJson) ?? new List<Dictionary<string, object>>();
+                    }
+                    catch { }
+                    
+                    if (variants.Any())
+                    {
+                        <div class="option-group">
+                            <span class="option-label">Dung Tích</span>
+                            @foreach (var variant in variants)
+                            {
+                                var capacity = variant?.GetValueOrDefault("Capacity")?.ToString() ?? "";
+                                var price = variant?.GetValueOrDefault("Price");
+                                var stock = variant?.GetValueOrDefault("Stock")?.ToString() ?? "0";
+                                var variantPrice = price != null ? decimal.Parse(price.ToString() ?? "0") : (decimal?)null;
+                                var variantStock = int.Parse(stock);
+                                
+                                <button class="size-btn variant-btn" 
+                                        data-capacity="@capacity"
+                                        data-price="@(variantPrice?.ToString("N0") ?? Model.Price.ToString("N0"))"
+                                        data-stock="@variantStock"
+                                        onclick="selectVariant(this, '@capacity', @(variantPrice?.ToString() ?? "null"), @variantStock)">
+                                    @capacity @(variantStock > 0 ? $"(Còn {variantStock})" : "(Hết hàng)")
+                                </button>
+                            }
+                        </div>
+                        <input type="hidden" id="selectedCapacity" value="" />
+                        <input type="hidden" id="selectedVariantPrice" value="@Model.Price" />
+                        <input type="hidden" id="selectedVariantStock" value="@Model.Stock" />
+                        <input type="hidden" id="basePrice" value="@Model.Price" />
+                        <input type="hidden" id="baseStock" value="@Model.Stock" />
+                    }
+                }
+
+                <div class="action-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                        <input type="text" value="1" class="qty-input" id="qtyInput" readonly>
+                        <button class="qty-btn" onclick="updateQty(1)">+</button>
+                    </div>
+                    <button class="add-cart-btn" onclick="addToCart(@Model.Id)"><i class="fa-solid fa-cart-plus"></i> Thêm Giỏ Hàng</button>
+                    <button class="buy-now-btn" onclick="buyNow(@Model.Id)">Mua Ngay</button>
+                    <button class="wishlist-btn wishlist-btn-detail" id="wishlistBtnDetail" data-product-id="@Model.Id" onclick="toggleWishlistDetail(@Model.Id, this)">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </div>
+
+                <div class="meta-info">
+                    @if (!string.IsNullOrEmpty(Model.SKU))
+                    {
+                        <p><span>SKU :</span> @Model.SKU</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.Tags))
+                    {
+                        <p><span>Tags :</span> @Model.Tags</p>
+                    }
+                    <p class="share-icons">
+                        <span>Share :</span>
+                        <i class="fa-brands fa-facebook-f"></i>
+                        <i class="fa-brands fa-twitter"></i>
+                        <i class="fa-brands fa-instagram"></i>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="product-tabs-section">
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-link active" onclick="openTab(event, 'desc')">Mô Tả</button>
+            <button class="nav-link" onclick="openTab(event, 'info')">Thông Tin Thêm</button>
+            <button class="nav-link" onclick="openTab(event, 'review')">Đánh Giá (@Model.ReviewCount)</button>
+        </div>
+
+        <div id="desc" class="tab-content tab-content-box active">
+            <div class="desc-text">
+                @if (!string.IsNullOrEmpty(Model.DetailedDescription))
+                {
+                    @Html.Raw(Model.DetailedDescription.Replace("\n", "<br>"))
+                }
+                else if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p>@Model.Description</p>
+                }
+            </div>
+        </div>
+
+        <div id="info" class="tab-content tab-content-box">
+            <table class="tech-table">
+                @if (!string.IsNullOrEmpty(Model.Brand))
+                {
+                    <tr><th>Thương hiệu</th><td>@Model.Brand</td></tr>
+                }
+                @if (!string.IsNullOrEmpty(Model.Origin))
+                {
+                    <tr><th>Xuất xứ</th><td>@Model.Origin</td></tr>
+                }
+                @{
+                    var variantsJsonForInfo = Model.StockByCapacity ?? "[]";
+                    var variantsForInfo = new List<Dictionary<string, object>>();
+                    try
+                    {
+                        variantsForInfo = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(variantsJsonForInfo) ?? new List<Dictionary<string, object>>();
+                    }
+                    catch { }
+                    
+                    if (variantsForInfo.Any())
+                    {
+                        var capacities = variantsForInfo.Select(v => v?.GetValueOrDefault("Capacity")?.ToString() ?? "").Where(c => !string.IsNullOrEmpty(c)).ToList();
+                        if (capacities.Any())
+                        {
+                            <tr><th>Dung tích</th><td>@string.Join(", ", capacities)</td></tr>
+                        }
+                    }
+                }
+                @if (!string.IsNullOrEmpty(Model.ExpiryDate))
+                {
+                    <tr><th>Hạn sử dụng</th><td>@Model.ExpiryDate</td></tr>
+                }
+            </table>
+        </div>
+
+        <div id="review" class="tab-content tab-content-box">
+            <div class="review-summary">
+                <div class="rating-big-box">
+                    <div class="rating-num">@Model.Rating.ToString("F1") <span>out of 5</span></div>
+                    <div class="rating-stars-big">
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <i class="fa-solid fa-star @(i < (int)Model.Rating ? "" : "text-muted")"></i>
+                        }
+                    </div>
+                    <p style="color:#888;">(@Model.ReviewCount Đánh giá)</p>
+                </div>
+            </div>
+
+            @if (ViewBag.CanReview == true && ViewBag.HasReviewed != true)
+            {
+                <div class="review-form-container" style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 12px;">
+                    <h4 style="margin-bottom: 15px; font-weight: 600;">Viết đánh giá của bạn</h4>
+                    <form id="reviewForm" onsubmit="event.preventDefault(); submitReview();">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Chọn đơn hàng:</label>
+                            <select id="reviewOrderId" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;" required>
+                                <option value="">-- Chọn đơn hàng --</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Đánh giá:</label>
+                            <div class="star-rating" id="starRating">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <i class="fa-regular fa-star star-icon" data-rating="@i" style="font-size: 28px; color: #ffc107; cursor: pointer; margin-right: 5px;" onmouseover="hoverStar(@i)" onmouseout="resetStars()" onclick="selectStar(@i)"></i>
+                                }
+                            </div>
+                            <input type="hidden" id="selectedRating" value="0" required>
+                            <small id="ratingError" style="color: #ef4444; display: none;">Vui lòng chọn số sao đánh giá</small>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Nhận xét:</label>
+                            <textarea id="reviewComment" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; resize: vertical;" maxlength="2000"></textarea>
+                            <small style="color: #888;">Tối đa 2000 ký tự</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn btn-primary" style="padding: 10px 30px; border-radius: 8px; font-weight: 600;">Gửi đánh giá</button>
+                        </div>
+                    </form>
+                </div>
+            }
+            else if (ViewBag.HasReviewed == true)
+            {
+                <div class="alert alert-info" style="margin-top: 20px; padding: 15px; background: #e0f2fe; color: #0369a1; border-radius: 8px;">
+                    <i class="fas fa-info-circle"></i> Bạn đã đánh giá sản phẩm này rồi.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning" style="margin-top: 20px; padding: 15px; background: #fef3c7; color: #92400e; border-radius: 8px;">
+                    <i class="fas fa-exclamation-triangle"></i> Chỉ khách hàng đã mua và nhận được sản phẩm mới có thể đánh giá. 
+                    @if (ViewBag.CanReview != true)
+                    {
+                        <span>Vui lòng <a href="/Account/Login" style="color: #92400e; text-decoration: underline;">đăng nhập</a> và hoàn thành đơn hàng để đánh giá.</span>
+                    }
+                </div>
+            }
+
+            <div id="reviewsList" style="margin-top: 30px;">
+                <h4 style="margin-bottom: 20px; font-weight: 600;">Tất cả đánh giá</h4>
+                <div id="reviewsContainer">
+                    <div class="text-center" style="padding: 40px;">
+                        <p style="color: #888;">Đang tải đánh giá...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+let currentImageIndex = 0;
+const images = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(imageList));
+
+function changeImage(direction) {
+    if (images.length === 0) return;
+    currentImageIndex += direction;
+    if (currentImageIndex < 0) currentImageIndex = images.length - 1;
+    if (currentImageIndex >= images.length) currentImageIndex = 0;
+    document.getElementById('mainImg').src = images[currentImageIndex];
+    updateThumbnailActive();
+}
+
+function changeImageTo(index) {
+    currentImageIndex = index;
+    document.getElementById('mainImg').src = images[index];
+    updateThumbnailActive();
+}
+
+function updateThumbnailActive() {
+    document.querySelectorAll('.thumb-item').forEach((item, index) => {
+        item.classList.toggle('active', index === currentImageIndex);
+    });
+}
+
+function selectVariant(btn, capacity, price, stock) {
+    // Remove active class from all variant buttons
+    document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+    // Add active class to selected button
+    btn.classList.add('active');
+    
+    // Update hidden fields
+    document.getElementById('selectedCapacity').value = capacity;
+    document.getElementById('selectedVariantPrice').value = price || document.getElementById('basePrice').value;
+    document.getElementById('selectedVariantStock').value = stock;
+    
+    // Update price display
+    const priceEl = document.getElementById('productPrice');
+    if (price) {
+        priceEl.innerHTML = parseFloat(price).toLocaleString('vi-VN') + 'đ';
+    } else {
+        priceEl.innerHTML = '@Model.Price.ToString("N0")đ';
+        @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+        {
+            <text>
+            priceEl.innerHTML += '<del>@Model.OriginalPrice.Value.ToString("N0")đ</del>';
+            </text>
+        }
+    }
+    
+    // Update quantity if it exceeds stock
+    const qtyInput = document.getElementById('qtyInput');
+    const currentQty = parseInt(qtyInput.value);
+    if (currentQty > stock) {
+        qtyInput.value = stock > 0 ? stock : 1;
+    }
+    
+    // Update stock badge
+    const stockBadge = document.querySelector('.stock-badge');
+    if (stockBadge) {
+        if (stock > 0) {
+            stockBadge.textContent = 'Còn hàng';
+            stockBadge.style.background = '';
+        } else {
+            stockBadge.textContent = 'Hết hàng';
+            stockBadge.style.background = '#e74c3c';
+        }
+    }
+}
+
+function updateQty(change) {
+    const input = document.getElementById('qtyInput');
+    const selectedStock = parseInt(document.getElementById('selectedVariantStock')?.value || '@Model.Stock');
+    let qty = parseInt(input.value) + change;
+    if (qty < 1) qty = 1;
+    if (qty > selectedStock) qty = selectedStock;
+    input.value = qty;
+}
+
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+    tablinks = document.getElementsByClassName("nav-link");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+    }
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+
+function addToCart(productId) {
+    const quantity = parseInt(document.getElementById('qtyInput')?.value || 1);
+    const selectedCapacity = document.getElementById('selectedCapacity')?.value || null;
+    
+    // Kiểm tra nếu có variants nhưng chưa chọn dung tích
+    const hasVariants = document.querySelectorAll('.variant-btn').length > 0;
+    if (hasVariants && (!selectedCapacity || selectedCapacity === '')) {
+        alert('Vui lòng chọn dung tích sản phẩm!');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('quantity', quantity);
+    if (selectedCapacity && selectedCapacity !== '') {
+        formData.append('capacity', selectedCapacity);
+    }
+
+    fetch(`/Cart/Add/${productId}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update cart badge
+            const cartBadge = document.querySelector('.cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = data.cartCount || 0;
+            } else {
+                // Create badge if doesn't exist
+                const cartBtn = document.querySelector('a[title="Giỏ hàng"]');
+                if (cartBtn && data.cartCount > 0) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge-count cart-badge';
+                    badge.id = 'cartBadge';
+                    badge.textContent = data.cartCount;
+                    cartBtn.appendChild(badge);
+                }
+            }
+            alert(data.message || 'Đã thêm sản phẩm vào giỏ hàng!');
+        } else {
+            alert(data.message || 'Có lỗi xảy ra!');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding to cart:', error);
+        alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng!');
+    });
+}
+
+function buyNow(productId) {
+    // Redirect to checkout or cart
+    const quantity = parseInt(document.getElementById('qtyInput')?.value || 1);
+    const selectedCapacity = document.getElementById('selectedCapacity')?.value || null;
+    
+    // Kiểm tra nếu có variants nhưng chưa chọn dung tích
+    const hasVariants = document.querySelectorAll('.variant-btn').length > 0;
+    if (hasVariants && (!selectedCapacity || selectedCapacity === '')) {
+        alert('Vui lòng chọn dung tích sản phẩm!');
+        return;
+    }
+    
+    // First add to cart, then redirect
+    const formData = new FormData();
+    formData.append('quantity', quantity);
+    if (selectedCapacity && selectedCapacity !== '') {
+        formData.append('capacity', selectedCapacity);
+    }
+
+    fetch(`/Cart/Add/${productId}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update cart badge
+            const cartBadge = document.querySelector('.cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = data.cartCount || 0;
+            }
+            window.location.href = '/Cart';
+        } else {
+            alert(data.message || 'Có lỗi xảy ra!');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra!');
+    });
+}
+
+// Toggle wishlist for detail page
+async function toggleWishlistDetail(productId, button) {
+    try {
+        const response = await fetch('/Wishlist/Toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `productId=${productId}`
+        });
+        
+        const result = await response.json();
+        
+        if (result.requireLogin) {
+            if (confirm('Vui lòng đăng nhập để sử dụng chức năng yêu thích. Chuyển đến trang đăng nhập?')) {
+                window.location.href = '/Account/Login';
+            }
+            return;
+        }
+        
+        if (result.success) {
+            const icon = button.querySelector('i');
+            
+            if (result.added) {
+                button.classList.add('active');
+                if (icon) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                }
+            } else {
+                button.classList.remove('active');
+                if (icon) {
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                }
+            }
+            
+            // Update header badge
+            if (typeof updateWishlistBadge === 'function') {
+                updateWishlistBadge(result.count);
+            }
+            
+            // Show toast
+            if (typeof showWishlistToastGlobal === 'function') {
+                showWishlistToastGlobal(result.added ? 'added' : 'removed', result.message);
+            }
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error('Error toggling wishlist:', error);
+    }
+}
+
+// Check if product is in wishlist on page load
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const productId = @Model.Id;
+        const response = await fetch(`/Wishlist/Check?productId=${productId}`);
+        const result = await response.json();
+        
+        if (result.isInWishlist) {
+            const btn = document.getElementById('wishlistBtnDetail');
+            if (btn) {
+                btn.classList.add('active');
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                }
+            }
+        }
+
+        // Load reviews and check if user can review
+        loadReviews();
+        checkCanReview();
+    } catch (error) {
+        console.error('Error checking wishlist:', error);
+    }
+});
+
+// Load reviews
+async function loadReviews() {
+    try {
+        const productId = @Model.Id;
+        const response = await fetch(`/Product/GetReviews?productId=${productId}`);
+        const result = await response.json();
+        
+        const container = document.getElementById('reviewsContainer');
+        if (!container) return;
+        
+        if (result.success && result.reviews && result.reviews.length > 0) {
+            container.innerHTML = result.reviews.map(review => `
+                <div class="review-item" style="padding: 20px; border-bottom: 1px solid #eee; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                        <img src="${review.userAvatar}" alt="${review.userName}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 5px;">${review.userName}</div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                <div class="review-stars">
+                                    ${Array.from({length: 5}, (_, i) => 
+                                        `<i class="fa-solid fa-star" style="color: ${i < review.rating ? '#ffc107' : '#ddd'}; font-size: 14px;"></i>`
+                                    ).join('')}
+                                </div>
+                                <span style="color: #888; font-size: 0.9rem;">${review.createdAt}</span>
+                            </div>
+                        </div>
+                    </div>
+                    ${review.comment ? `<div style="color: #333; line-height: 1.6; margin-top: 10px;">${escapeHtml(review.comment)}</div>` : ''}
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="text-center" style="padding: 40px;"><p style="color: #888;">Chưa có đánh giá nào.</p></div>';
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        const container = document.getElementById('reviewsContainer');
+        if (container) {
+            container.innerHTML = '<div class="text-center" style="padding: 40px;"><p style="color: #ef4444;">Có lỗi xảy ra khi tải đánh giá.</p></div>';
+        }
+    }
+}
+
+// Check if user can review
+async function checkCanReview() {
+    try {
+        const productId = @Model.Id;
+        const response = await fetch(`/Product/CanReview?productId=${productId}`);
+        const result = await response.json();
+        
+        if (result.success && result.canReview && result.orders && result.orders.length > 0) {
+            const orderSelect = document.getElementById('reviewOrderId');
+            if (orderSelect) {
+                orderSelect.innerHTML = '<option value="">-- Chọn đơn hàng --</option>' +
+                    result.orders.map(order => 
+                        `<option value="${order.orderId}">Đơn hàng ${order.orderCode} - ${order.createdAt}</option>`
+                    ).join('');
+            }
+        }
+    } catch (error) {
+        console.error('Error checking can review:', error);
+    }
+}
+
+// Star rating functions
+let selectedRating = 0;
+
+function hoverStar(rating) {
+    const stars = document.querySelectorAll('.star-icon');
+    stars.forEach((star, index) => {
+        const starRating = parseInt(star.getAttribute('data-rating'));
+        if (starRating <= rating) {
+            star.classList.remove('fa-regular');
+            star.classList.add('fa-solid');
+        } else {
+            star.classList.remove('fa-solid');
+            star.classList.add('fa-regular');
+        }
+    });
+}
+
+function resetStars() {
+    const stars = document.querySelectorAll('.star-icon');
+    stars.forEach((star, index) => {
+        const starRating = parseInt(star.getAttribute('data-rating'));
+        if (selectedRating === 0 || starRating > selectedRating) {
+            star.classList.remove('fa-solid');
+            star.classList.add('fa-regular');
+        } else {
+            star.classList.remove('fa-regular');
+            star.classList.add('fa-solid');
+        }
+    });
+}
+
+function selectStar(rating) {
+    selectedRating = rating;
+    document.getElementById('selectedRating').value = rating;
+    const errorEl = document.getElementById('ratingError');
+    if (errorEl) errorEl.style.display = 'none';
+    
+    const stars = document.querySelectorAll('.star-icon');
+    stars.forEach((star) => {
+        const starRating = parseInt(star.getAttribute('data-rating'));
+        if (starRating <= rating) {
+            star.classList.remove('fa-regular');
+            star.classList.add('fa-solid');
+        } else {
+            star.classList.remove('fa-solid');
+            star.classList.add('fa-regular');
+        }
+    });
+}
+
+// Submit review
+async function submitReview() {
+    const productId = @Model.Id;
+    const orderId = document.getElementById('reviewOrderId')?.value;
+    const rating = parseInt(document.getElementById('selectedRating')?.value || 0);
+    const comment = document.getElementById('reviewComment')?.value?.trim() || '';
+
+    // Validation
+    if (!orderId) {
+        alert('Vui lòng chọn đơn hàng');
+        return;
+    }
+
+    if (rating < 1 || rating > 5) {
+        document.getElementById('ratingError').style.display = 'block';
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('productId', productId);
+        formData.append('orderId', orderId);
+        formData.append('rating', rating);
+        if (comment) {
+            formData.append('comment', comment);
+        }
+
+        const response = await fetch('/Product/AddReview', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message || 'Đánh giá của bạn đã được ghi nhận. Cảm ơn bạn!');
+            // Reset form
+            document.getElementById('reviewForm').reset();
+            selectedRating = 0;
+            resetStars();
+            // Reload reviews
+            loadReviews();
+            // Reload page to update rating and review count
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            alert(result.message || 'Có lỗi xảy ra khi gửi đánh giá');
+        }
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        alert('Có lỗi xảy ra khi gửi đánh giá');
+    }
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+</script>
+@Html.AntiForgeryToken()

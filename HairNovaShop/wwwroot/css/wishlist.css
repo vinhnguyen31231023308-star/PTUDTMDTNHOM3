@@ -1,0 +1,461 @@
+/* =========================================
+   WISHLIST PAGE STYLES
+   ========================================= */
+
+/* PAGE LAYOUT */
+.wishlist-page {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 150px 20px 40px;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1f2933;
+}
+
+.wishlist-count {
+    font-size: 14px;
+    font-weight: 400;
+    color: #6b7280;
+}
+
+/* WISHLIST TABLE */
+.wishlist-table {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+/* header + từng dòng */
+.wishlist-header-row,
+.wishlist-row {
+    display: grid;
+    grid-template-columns: 3fr 1.1fr 1.1fr 1.1fr 2fr;
+    align-items: center;
+    padding: 12px 20px;
+    column-gap: 12px;
+}
+
+.wishlist-header-row {
+    background: #f3f4f6;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.06em;
+}
+
+.wishlist-row {
+    font-size: 0.88rem;
+    transition: background 0.2s;
+}
+
+.wishlist-row:nth-child(odd) {
+    background: #ffffff;
+}
+
+.wishlist-row:nth-child(even) {
+    background: #f9fafb;
+}
+
+.wishlist-row:hover {
+    background: #f0f7ff;
+}
+
+.wishlist-row + .wishlist-row {
+    border-top: 1px solid #e5e7eb;
+}
+
+/* cột sản phẩm */
+.w-col-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.w-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.w-prod-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.w-prod-brand {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--bs-primary);
+    margin-bottom: 2px;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+.w-prod-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #111827;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.w-prod-name:hover {
+    color: var(--bs-primary);
+}
+
+/* ngày, trạng thái, giá */
+.w-date {
+    font-size: 0.8rem;
+    color: #4b5563;
+}
+
+.w-status {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.w-status-instock {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.w-status-outstock {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.w-price {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e65300;
+    white-space: nowrap;
+}
+
+/* BUTTONS trong wishlist */
+.w-col-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+}
+
+/* nút viền xám + nút xanh */
+.w-btn-outline,
+.w-btn-primary {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.3;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* nút "Xem chi tiết" */
+.w-btn-outline {
+    background: #ffffff;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+.w-btn-outline:hover {
+    background: #f3f4f6;
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+}
+
+/* nút "Thêm vào giỏ hàng" */
+.w-btn-primary {
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: #ffffff;
+}
+
+.w-btn-primary:hover {
+    background: var(--bs-primary-dark);
+}
+
+.w-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* nút icon X xoá dòng */
+.w-btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.w-btn-icon:hover {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+/* Empty state */
+.wishlist-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.wishlist-empty i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 20px;
+}
+
+.wishlist-empty h3 {
+    font-size: 1.3rem;
+    color: #374151;
+    margin-bottom: 10px;
+}
+
+.wishlist-empty p {
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.wishlist-empty .btn-shop {
+    display: inline-block;
+    padding: 12px 30px;
+    background: var(--bs-primary);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.wishlist-empty .btn-shop:hover {
+    background: var(--bs-primary-dark);
+    transform: translateY(-2px);
+}
+
+/* STRIP DỊCH VỤ */
+.service-strip {
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 30px 0;
+    background: #f8fafc;
+    margin-top: 40px;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.service-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.service-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.service-item p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-gray);
+    margin: 0;
+}
+
+/* strip hotline + chi nhánh */
+.wishlist-bottom-strip {
+    padding: 30px 0;
+    background: #fff;
+}
+
+.bottom-strip-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.bottom-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    background: #f9fafc;
+    text-align: center;
+}
+
+.bottom-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.bottom-main {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--bs-primary);
+    margin-bottom: 4px;
+}
+
+.bottom-sub {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+}
+
+/* Toast notification for wishlist */
+.wishlist-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    min-width: 300px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    transform: translateX(150%);
+    transition: transform 0.4s ease;
+}
+
+.wishlist-toast.show {
+    transform: translateX(0);
+}
+
+.wishlist-toast.added {
+    border-left: 4px solid #22c55e;
+}
+
+.wishlist-toast.removed {
+    border-left: 4px solid #ef4444;
+}
+
+.wishlist-toast i {
+    font-size: 1.5rem;
+}
+
+.wishlist-toast.added i {
+    color: #22c55e;
+}
+
+.wishlist-toast.removed i {
+    color: #ef4444;
+}
+
+.wishlist-toast-content {
+    flex: 1;
+}
+
+.wishlist-toast-title {
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 2px;
+}
+
+.wishlist-toast-message {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+/* responsive */
+@media (max-width: 992px) {
+    .wishlist-header-row,
+    .wishlist-row {
+        grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    }
+    
+    .w-col-date {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .wishlist-header-row {
+        display: none;
+    }
+    
+    .wishlist-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 16px;
+    }
+    
+    .w-col-product {
+        flex-direction: row;
+    }
+    
+    .w-col-status,
+    .w-col-price {
+        text-align: left;
+    }
+    
+    .w-col-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    
+    .service-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .bottom-strip-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .w-btn-outline,
+    .w-btn-primary {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+}

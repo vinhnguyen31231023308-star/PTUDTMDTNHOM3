@@ -1,0 +1,101 @@
+@model List<HairNovaShop.Models.Product>
+@{
+    ViewData["Title"] = "Cửa hàng";
+}
+
+<section class="shop-header">
+    <img src="~/images/shop-banner.png" alt="HairNova Banner" class="shop-banner" onerror="this.style.display='none';" />
+</section>
+
+<main class="shop-main">
+    <!-- SIDEBAR FILTER -->
+    <aside class="shop-sidebar">
+        <div class="filter-block">
+            <h3 class="filter-title">Danh mục</h3>
+            <ul class="filter-list">
+                <li><a asp-action="Shop" asp-route-category="all" asp-route-sort="@ViewBag.Sort" class="filter-btn cat-btn @(ViewBag.Category == "all" ? "active" : "")">Tất cả</a></li>
+                <li><a asp-action="Shop" asp-route-category="Dầu gội" asp-route-sort="@ViewBag.Sort" class="filter-btn cat-btn @(ViewBag.Category == "Dầu gội" ? "active" : "")">Dầu gội</a></li>
+                <li><a asp-action="Shop" asp-route-category="Dầu xả" asp-route-sort="@ViewBag.Sort" class="filter-btn cat-btn @(ViewBag.Category == "Dầu xả" ? "active" : "")">Dầu xả</a></li>
+                <li><a asp-action="Shop" asp-route-category="Dầu dưỡng" asp-route-sort="@ViewBag.Sort" class="filter-btn cat-btn @(ViewBag.Category == "Dầu dưỡng" ? "active" : "")">Dầu dưỡng</a></li>
+                <li><a asp-action="Shop" asp-route-category="Thuốc nhuộm" asp-route-sort="@ViewBag.Sort" class="filter-btn cat-btn @(ViewBag.Category == "Thuốc nhuộm" ? "active" : "")">Thuốc nhuộm</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <section class="shop-content">
+        <!-- SORT TABS -->
+        <div class="shop-toolbar">
+            <div class="sort-tabs">
+                <a asp-action="Shop" asp-route-category="@ViewBag.Category" asp-route-sort="popular" class="sort-tab @(ViewBag.Sort == "popular" ? "active" : "")">Bán chạy</a>
+                <a asp-action="Shop" asp-route-category="@ViewBag.Category" asp-route-sort="new" class="sort-tab @(ViewBag.Sort == "new" ? "active" : "")">Mới nhất</a>
+                <a asp-action="Shop" asp-route-category="@ViewBag.Category" asp-route-sort="priceAsc" class="sort-tab @(ViewBag.Sort == "priceAsc" ? "active" : "")">Giá thấp đến cao</a>
+                <a asp-action="Shop" asp-route-category="@ViewBag.Category" asp-route-sort="priceDesc" class="sort-tab @(ViewBag.Sort == "priceDesc" ? "active" : "")">Giá cao đến thấp</a>
+            </div>
+            <div class="product-count">
+                Có <span>@Model.Count</span> sản phẩm
+            </div>
+        </div>
+
+        <!-- PRODUCT GRID -->
+        <div class="product-grid">
+            @foreach (var product in Model)
+            {
+                <div class="product-card">
+                    <div class="prod-img-box">
+                        @if (product.OnSale)
+                        {
+                            <span class="sale-badge">GIẢM GIÁ</span>
+                        }
+                        @if (product.IsNew)
+                        {
+                            <span class="sale-badge" style="background: #e74c3c;">MỚI</span>
+                        }
+                        <a asp-action="Details" asp-route-id="@product.Id">
+                            <img src="@(product.MainImage ?? "/images/placeholder.jpg")" alt="@product.Name" class="prod-img" onerror="this.src='/images/placeholder.jpg';">
+                        </a>
+                        <div class="action-icons">
+                            <button class="action-btn" title="Yêu thích">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+                            <button class="action-btn" title="Giỏ hàng">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="prod-info">
+                        <div class="info-top-row">
+                            <div class="prod-cat">@(product.Category?.Name ?? "Sản phẩm")</div>
+                            @if (product.Rating > 0)
+                            {
+                                <div class="prod-rating">★ @product.Rating.ToString("F1")</div>
+                            }
+                        </div>
+                        <h3 class="prod-name">
+                            <a asp-action="Details" asp-route-id="@product.Id" style="text-decoration: none; color: inherit;">@product.Name</a>
+                        </h3>
+                        <div class="prod-price">
+                            @product.Price.ToString("N0")₫
+                            @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
+                            {
+                                <span class="old-price">@product.OriginalPrice.Value.ToString("N0")₫</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</main>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/shop.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/js/shop.js" asp-append-version="true"></script>
+}

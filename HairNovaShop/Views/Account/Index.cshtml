@@ -1,0 +1,511 @@
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = ViewBag.User as HairNovaShop.Models.User;
+    var orders = ViewBag.Orders as List<HairNovaShop.Models.Order> ?? new List<HairNovaShop.Models.Order>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/user.css" asp-append-version="true" />
+}
+
+<div class="container">
+    <div class="profile-layout">
+
+        <aside class="sidebar-wrapper hidden-left delay-100">
+            <div class="card-box sidebar-card">
+                <div class="user-header-bg"></div>
+                <div class="user-avatar-wrapper">
+                    @{
+                        var avatarName = user?.FullName ?? "User";
+                        var avatarUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString(avatarName)}&background=0061E1&color=fff&length=2";
+                    }
+                    <img src="@avatarUrl" alt="Avatar" class="user-avatar">
+                </div>
+
+                <div class="text-center" style="padding: 15px 20px 25px;">
+                    <h3 style="font-weight: 700; font-size: 1.2rem;">@(user?.FullName ?? "Người dùng")</h3>
+                    <p style="color: var(--text-gray); font-size: 0.9rem;">@(user?.Email ?? "")</p>
+                </div>
+
+                <ul class="sidebar-menu">
+                    <li class="menu-item active" onclick="openTab('dashboard', this)">
+                        <i class="fas fa-th-large"></i> Tổng quan
+                    </li>
+                    <li class="menu-item" onclick="openTab('tracking', this)">
+                        <i class="fas fa-truck-fast"></i> Theo dõi đơn hàng
+                    </li>
+                    <li class="menu-item" onclick="openTab('orders', this)">
+                        <i class="fas fa-shopping-bag"></i> Lịch sử mua hàng
+                    </li>
+                    <li class="menu-item" onclick="openTab('address', this)">
+                        <i class="fas fa-map-marker-alt"></i> Sổ địa chỉ
+                    </li>
+                    <li class="menu-item" onclick="openTab('profile', this)">
+                        <i class="fas fa-user-cog"></i> Cài đặt tài khoản
+                    </li>
+                    <li class="menu-item" style="color: #ef4444; margin-top: 10px;" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="content-wrapper">
+
+            <div id="dashboard" class="tab-pane active">
+                <div class="hidden-up delay-200">
+                    <div class="welcome-banner">
+                        <div>
+                            <span class="subtitle">Dashboard</span>
+                            <h1 class="section-title" style="font-size: 1.5rem; margin-bottom: 5px;">Xin chào, @(user?.FullName?.Split(' ').LastOrDefault() ?? "Bạn")!</h1>
+                            <p style="color: var(--text-gray);">Bạn có @ViewBag.ShippingOrders đơn hàng đang trên đường giao.</p>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="openTab('tracking', document.querySelectorAll('.menu-item')[1])">
+                                Xem tiến độ <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stats-container">
+                        <div class="stat-box">
+                            <div class="stat-icon"><i class="fas fa-spinner"></i></div>
+                            <h3 class="text-primary">@ViewBag.ProcessingOrders</h3>
+                            <p style="color: var(--text-gray); font-size: 0.9rem;">Đơn đang xử lý</p>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon"><i class="fas fa-truck"></i></div>
+                            <h3 class="text-primary">@ViewBag.ShippingOrders</h3>
+                            <p style="color: var(--text-gray); font-size: 0.9rem;">Đang vận chuyển</p>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <h3 class="text-primary">@ViewBag.CompletedOrders</h3>
+                            <p style="color: var(--text-gray); font-size: 0.9rem;">Đơn thành công</p>
+                        </div>
+                    </div>
+
+                    <div class="card-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="font-size: 1.2rem; font-weight: 700;">Đơn hàng mới nhất</h3>
+                            <a href="#" onclick="openTab('orders', document.querySelectorAll('.menu-item')[2])" style="color: var(--bs-primary); font-size: 0.9rem; font-weight: 500;">Xem tất cả</a>
+                        </div>
+
+                        <div id="dashboard-recent-orders">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="tracking" class="tab-pane">
+                <span class="subtitle">Tra cứu vận đơn</span>
+                <h2 class="section-title">Theo dõi đơn hàng</h2>
+
+                <div class="card-box hidden-up delay-100">
+                    <div class="tracking-search">
+                        <input type="text" class="form-control" id="tracking-order-code" placeholder="Nhập mã đơn hàng (VD: ORD20250115123456)" onkeypress="if(event.key === 'Enter') searchTracking();">
+                        <button class="btn btn-primary" onclick="searchTracking()">
+                            <i class="fas fa-search" style="margin-right: 8px;"></i>Tra cứu
+                        </button>
+                    </div>
+                    <div id="tracking-result" style="display: none;">
+                        <hr style="border: 0; border-top: 1px dashed #eee; margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 30px;">
+                            <div>
+                                <h3 style="font-size: 1.1rem; margin-bottom: 5px;">Mã đơn: <span id="tracking-order-code-display">--</span></h3>
+                                <p style="color: var(--text-gray); font-size: 0.9rem;">Ngày đặt: <strong id="tracking-order-date">--/--/----</strong></p>
+                                <p style="color: var(--text-gray); font-size: 0.9rem;">Dự kiến giao: <strong id="tracking-expected-date">--/--/----</strong></p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="status-badge status-pending" id="tracking-status-badge" style="font-size: 1rem; padding: 8px 15px;">--</span>
+                            </div>
+                        </div>
+                        <div class="tracking-timeline">
+                            <div class="progress-bar-bg"></div>
+                            <div class="progress-bar-fill" id="tracking-progress" style="width: 0%;"></div>
+                            <div class="steps-wrapper">
+                                <div class="step-item" id="step-1">
+                                    <div class="step-circle"><i class="fas fa-check"></i></div>
+                                    <div class="step-label">Đã đặt hàng</div>
+                                    <span class="step-date" id="step-1-date">--/--</span>
+                                </div>
+                                <div class="step-item" id="step-2">
+                                    <div class="step-circle"><i class="fas fa-check"></i></div>
+                                    <div class="step-label">Đã xác nhận</div>
+                                    <span class="step-date" id="step-2-date">--/--</span>
+                                </div>
+                                <div class="step-item" id="step-3">
+                                    <div class="step-circle"><i class="fas fa-truck"></i></div>
+                                    <div class="step-label">Đang giao</div>
+                                    <span class="step-date" id="step-3-date">--/--</span>
+                                </div>
+                                <div class="step-item" id="step-4">
+                                    <div class="step-circle">4</div>
+                                    <div class="step-label">Giao thành công</div>
+                                    <span class="step-date" id="step-4-date">--/--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tracking-logs" id="tracking-logs">
+                            <h4 style="margin-bottom: 15px;">Chi tiết hành trình</h4>
+                            <div class="log-item">
+                                <div class="log-icon"><i class="fas fa-info-circle"></i></div>
+                                <div class="log-content">
+                                    <h4>Nhập mã đơn hàng để xem chi tiết</h4>
+                                    <p>Vui lòng nhập mã đơn hàng ở trên và nhấn "Tra cứu"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="orders" class="tab-pane">
+                <span class="subtitle">Lịch sử mua sắm</span>
+                <h2 class="section-title">Danh sách đơn hàng</h2>
+
+                <div class="card-box" style="margin-bottom: 20px; padding: 15px;">
+                    <div class="filter-buttons">
+                        <button class="btn-filter active" onclick="filterOrders('all', this)">Tất cả</button>
+                        <button class="btn-filter" onclick="filterOrders('processing', this)">Đang xử lý</button>
+                        <button class="btn-filter" onclick="filterOrders('success', this)">Thành công</button>
+                        <button class="btn-filter" onclick="filterOrders('cancelled', this)">Đã hủy</button>
+                    </div>
+                </div>
+
+                <div id="order-list-container" class="hidden-up delay-100">
+                </div>
+
+            </div>
+
+            <div id="address" class="tab-pane">
+                <span class="subtitle">Giao hàng & Thanh toán</span>
+                <h2 class="section-title">Sổ địa chỉ</h2>
+
+                <div class="address-grid hidden-up delay-100" id="address-list">
+                    @if (orders.Any())
+                    {
+                        var uniqueAddresses = orders
+                            .Where(o => !string.IsNullOrEmpty(o.ShippingAddress))
+                            .GroupBy(o => new { o.ShippingAddress, o.ShippingProvince, o.ShippingWard })
+                            .Select(g => g.First())
+                            .OrderByDescending(o => o.CreatedAt)
+                            .Take(5)
+                            .ToList();
+
+                        @foreach (var order in uniqueAddresses)
+                        {
+                            var isDefault = order == uniqueAddresses.First();
+                            <div class="address-card @(isDefault ? "default" : "")">
+                                @if (isDefault)
+                                {
+                                    <span class="badge-default">Mặc định</span>
+                                }
+                                <div>
+                                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Địa chỉ giao hàng</h3>
+                                    <p style="font-weight: 600; margin-bottom: 5px;">@order.CustomerName <span style="font-weight: 400; color: #666;">@order.CustomerPhone</span></p>
+                                    <p style="color: var(--text-gray); font-size: 0.9rem; line-height: 1.5;">
+                                        @order.ShippingAddress
+                                        @if (!string.IsNullOrEmpty(order.ShippingProvince))
+                                        {
+                                            <text>, @order.ShippingProvince</text>
+                                        }
+                                        @if (!string.IsNullOrEmpty(order.ShippingWard))
+                                        {
+                                            <text>, @order.ShippingWard</text>
+                                        }
+                                    </p>
+                                </div>
+                                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                    <button class="btn btn-outline" style="padding: 5px 15px; font-size: 0.8rem;" onclick="openEditAddressModal('@order.Id')">Sửa</button>
+                                    @if (!isDefault)
+                                    {
+                                        <button class="btn btn-danger-soft" style="padding: 5px 15px; font-size: 0.8rem; border-radius: 50px; border:none; cursor:pointer;" onclick="handleDeleteAddress('@order.Id', this)">Xóa</button>
+                                    }
+                                </div>
+                                <input type="hidden" class="address-data" data-name="@order.CustomerName" data-phone="@order.CustomerPhone" data-address="@order.ShippingAddress" data-province="@order.ShippingProvince" data-ward="@order.ShippingWard" />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="address-card default">
+                            <span class="badge-default">Mặc định</span>
+                            <div>
+                                <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">Địa chỉ giao hàng</h3>
+                                <p style="font-weight: 600; margin-bottom: 5px;">@(user?.FullName ?? "") <span style="font-weight: 400; color: #666;">@(user?.Phone ?? "")</span></p>
+                                <p style="color: var(--text-gray); font-size: 0.9rem; line-height: 1.5;">Chưa có địa chỉ giao hàng</p>
+                            </div>
+                            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                <button class="btn btn-outline" style="padding: 5px 15px; font-size: 0.8rem;" onclick="openAddAddressModal()">Thêm địa chỉ</button>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="address-card add-address-card" onclick="openAddAddressModal()">
+                        <i class="fas fa-plus-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                        <span>Thêm địa chỉ mới</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="profile" class="tab-pane">
+                <span class="subtitle">Cài đặt</span>
+                <h2 class="section-title">Thông tin tài khoản</h2>
+
+                <div class="card-box hidden-up delay-100">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Thông tin cá nhân</h3>
+                    <form id="profile-form">
+                        @Html.AntiForgeryToken()
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Họ và tên</label>
+                                <input type="text" class="form-control" id="profile-fullname" value="@(user?.FullName ?? "")" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="@(user?.Email ?? "")" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="profile-phone" value="@(user?.Phone ?? "")" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tên đăng nhập</label>
+                                <input type="text" class="form-control" value="@(user?.Username ?? "")" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
+                            </div>
+                        </div>
+
+                        <div style="text-align: right; margin-bottom: 30px;">
+                            <button type="button" class="btn btn-primary" onclick="updateProfile()">Lưu thông tin</button>
+                        </div>
+                    </form>
+
+                    <h3 style="font-size: 1.1rem; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 30px;">Bảo mật & Mật khẩu</h3>
+                    <form id="password-form" onsubmit="event.preventDefault(); changePassword();">
+                        <div class="form-group">
+                            <label class="form-label">Mật khẩu hiện tại <span style="color: #ef4444;">*</span></label>
+                            <input type="password" class="form-control" id="current-password" placeholder="Nhập mật khẩu hiện tại" required autocomplete="current-password">
+                            <small style="color: var(--text-gray); font-size: 0.85rem; margin-top: 5px; display: block;">Vui lòng nhập mật khẩu hiện tại để xác thực</small>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Mật khẩu mới <span style="color: #ef4444;">*</span></label>
+                                <input type="password" class="form-control" id="new-password" placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password" minlength="6">
+                                <small style="color: var(--text-gray); font-size: 0.85rem; margin-top: 5px; display: block;">Mật khẩu phải có ít nhất 6 ký tự</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nhập lại mật khẩu mới <span style="color: #ef4444;">*</span></label>
+                                <input type="password" class="form-control" id="confirm-password" placeholder="Nhập lại mật khẩu mới" required autocomplete="new-password" minlength="6">
+                                <small style="color: var(--text-gray); font-size: 0.85rem; margin-top: 5px; display: block;">Xác nhận mật khẩu mới của bạn</small>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<div id="order-detail-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 550px;">
+        <div class="modal-header">
+            <h4 class="modal-title">Chi tiết Đơn hàng</h4>
+            <button type="button" class="close-btn" onclick="closeOrderDetailModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="detail-modal-body" style="padding-bottom: 0;">
+        </div>
+        <div class="modal-footer" style="text-align: right; padding-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+        </div>
+    </div>
+</div>
+
+<div id="address-modal" class="modal-overlay">
+    <div class="modal-content card-box">
+        <div class="modal-header">
+            <h3 id="modal-title">Thêm địa chỉ mới</h3>
+            <button type="button" class="modal-close" onclick="closeAddressModal()">&times;</button>
+        </div>
+        <form id="address-form" onsubmit="event.preventDefault(); saveAddress();">
+            <div class="form-group">
+                <label class="form-label">Tên người nhận <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="recipient-name" class="form-control" placeholder="Nguyễn Văn A" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Số điện thoại <span style="color: #ef4444;">*</span></label>
+                <input type="tel" id="recipient-phone" class="form-control" placeholder="09xxxxxx" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Địa chỉ chi tiết (Số nhà, Tên đường) <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="street-address" class="form-control" placeholder="Ví dụ: 123 Đường Cộng Hòa" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Tỉnh/Thành <span style="color: #ef4444;">*</span></label>
+                    <select id="province" class="form-control" required>
+                        <option value="">Chọn Tỉnh/Thành</option>
+                        <option value="HCM">TP. Hồ Chí Minh</option>
+                        <option value="HN">Hà Nội</option>
+                        <option value="DN">Đà Nẵng</option>
+                        <option value="HP">Hải Phòng</option>
+                        <option value="CT">Cần Thơ</option>
+                        <option value="KH">Khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Quận/Huyện</label>
+                    <input type="text" id="district" class="form-control" placeholder="Ví dụ: Quận 10">
+                </div>
+            </div>
+            <div class="form-group-checkbox">
+                <input type="checkbox" id="set-default-address">
+                <label for="set-default-address">Đặt làm địa chỉ mặc định</label>
+            </div>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="button" class="btn btn-outline" onclick="closeAddressModal()">Hủy</button>
+                <button type="submit" class="btn btn-primary">Lưu địa chỉ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="passwordChangeToast" class="toast-notification" style="display: none;">
+    <div class="toast-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <div class="toast-content">
+        <div class="toast-title"></div>
+        <div class="toast-message"></div>
+    </div>
+    <button class="toast-close" onclick="closePasswordToast()">
+        <i class="fas fa-times"></i>
+    </button>
+    <div class="toast-progress"></div>
+</div>
+
+<style>
+    .toast-notification {
+        position: fixed;
+        top: 150px;
+        right: 30px;
+        min-width: 350px;
+        max-width: 450px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        gap: 15px;
+        z-index: 10000;
+        animation: slideInRight 0.5s ease forwards;
+        overflow: hidden;
+    }
+    .toast-notification.success {
+        border-left: 5px solid #22c55e;
+    }
+    .toast-notification.success .toast-icon {
+        color: #22c55e;
+    }
+    .toast-notification.error {
+        border-left: 5px solid #ef4444;
+    }
+    .toast-notification.error .toast-icon {
+        color: #ef4444;
+    }
+    .toast-notification .toast-icon {
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+    .toast-notification .toast-content {
+        flex: 1;
+    }
+    .toast-notification .toast-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #1a202c;
+        margin-bottom: 4px;
+    }
+    .toast-notification .toast-message {
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+    .toast-notification .toast-close {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+    }
+    .toast-notification .toast-close:hover {
+        color: #1a202c;
+    }
+    .toast-notification .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        background: #22c55e;
+        width: 100%;
+        animation: progressBar 5s linear forwards;
+    }
+    .toast-notification.error .toast-progress {
+        background: #ef4444;
+    }
+    .toast-notification.info .toast-progress {
+        background: #3b82f6;
+    }
+    .toast-notification.hide {
+        animation: slideOutRight 0.5s ease forwards;
+    }
+    @@keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    @@keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    @@keyframes progressBar {
+        from {
+            width: 100%;
+        }
+        to {
+            width: 0%;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script src="~/js/user.js" asp-append-version="true"></script>
+}

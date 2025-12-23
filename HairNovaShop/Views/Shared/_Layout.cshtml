@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"] - HairNovaShop</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/head.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/footer.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/HairNovaShop.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <!-- Header (Partial View) -->
+    @await Html.PartialAsync("_Header")
+
+    <!-- Main Content -->
+    <div>
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Footer (Partial View) -->
+    @await Html.PartialAsync("_Footer")
+
+    <!-- Toast Notification -->
+    @if (TempData["OrderSuccess"] != null)
+    {
+        <div id="orderSuccessToast" class="toast-notification success">
+            <div class="toast-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="toast-content">
+                <div class="toast-title">Thành công!</div>
+                <div class="toast-message">@TempData["OrderSuccess"]</div>
+            </div>
+            <button class="toast-close" onclick="closeToast()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="toast-progress"></div>
+        </div>
+    }
+
+    <style>
+        .toast-notification {
+            position: fixed;
+            top: 150px;
+            right: 30px;
+            min-width: 350px;
+            max-width: 450px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            gap: 15px;
+            z-index: 9999;
+            animation: slideInRight 0.5s ease forwards;
+            overflow: hidden;
+        }
+        .toast-notification.success {
+            border-left: 5px solid #22c55e;
+        }
+        .toast-notification.success .toast-icon {
+            color: #22c55e;
+        }
+        .toast-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        .toast-content {
+            flex: 1;
+        }
+        .toast-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        .toast-message {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        .toast-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 16px;
+            transition: color 0.2s;
+        }
+        .toast-close:hover {
+            color: #475569;
+        }
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: #22c55e;
+            animation: progressBar 5s linear forwards;
+        }
+        @@keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @@keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        @@keyframes progressBar {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0%;
+            }
+        }
+        .toast-notification.hide {
+            animation: slideOutRight 0.5s ease forwards;
+        }
+    </style>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/head.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/wishlist.js" asp-append-version="true"></script>
+    
+    <!-- Viewport & Scaling Detection & Normalization -->
+    <script>
+        (function() {
+            // #region agent log - Hypothesis A: Viewport meta tag too strict
+            const viewportMeta = document.querySelector('meta[name="viewport"]');
+            const viewportContent = viewportMeta ? viewportMeta.getAttribute('content') : 'not found';
+            fetch('http://127.0.0.1:7242/ingest/9b7c6f72-11df-457e-a521-b0316a2b2596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'_Layout.cshtml:viewport-meta',message:'Viewport meta tag content check',data:{viewportContent:viewportContent,hasUserScalableNo:viewportContent.includes('user-scalable=no'),hasMaxScale:viewportContent.includes('maximum-scale')},timestamp:Date.now(),sessionId:'debug-session',runId:'viewport-check',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            
+            // #region agent log - Hypothesis B: Browser zoom level differs
+            const viewportData = {
+                innerWidth: window.innerWidth,
+                outerWidth: window.outerWidth,
+                innerHeight: window.innerHeight,
+                outerHeight: window.outerHeight,
+                devicePixelRatio: window.devicePixelRatio || 1,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                screenAvailWidth: screen.availWidth,
+                screenAvailHeight: screen.availHeight,
+                clientWidth: document.documentElement.clientWidth,
+                clientHeight: document.documentElement.clientHeight,
+                computedZoom: window.outerWidth / window.innerWidth,
+                userAgent: navigator.userAgent
+            };
+            const zoomLevel = viewportData.computedZoom;
+            const isZoomed = Math.abs(zoomLevel - 1.0) > 0.05;
+            fetch('http://127.0.0.1:7242/ingest/9b7c6f72-11df-457e-a521-b0316a2b2596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'_Layout.cshtml:zoom-detection',message:'Browser zoom level check',data:{...viewportData,zoomLevel:zoomLevel,isZoomed:isZoomed,zoomPercent:(zoomLevel * 100).toFixed(1)},timestamp:Date.now(),sessionId:'debug-session',runId:'viewport-check',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
+            
+            // #region agent log - Hypothesis C: Device pixel ratio differs
+            fetch('http://127.0.0.1:7242/ingest/9b7c6f72-11df-457e-a521-b0316a2b2596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'_Layout.cshtml:dpr-check',message:'Device pixel ratio check',data:{devicePixelRatio:viewportData.devicePixelRatio,screenRatio:viewportData.screenWidth/viewportData.clientWidth,expectedDPR:viewportData.screenWidth/viewportData.innerWidth},timestamp:Date.now(),sessionId:'debug-session',runId:'viewport-check',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
+            
+            // #region agent log - Hypothesis D: CSS font-size scaling
+            const htmlStyle = window.getComputedStyle(document.documentElement);
+            const bodyStyle = window.getComputedStyle(document.body);
+            const htmlFontSize = htmlStyle.fontSize;
+            const bodyFontSize = bodyStyle.fontSize;
+            const textSizeAdjust = bodyStyle.webkitTextSizeAdjust || bodyStyle.textSizeAdjust || 'none';
+            fetch('http://127.0.0.1:7242/ingest/9b7c6f72-11df-457e-a521-b0316a2b2596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'_Layout.cshtml:font-size-check',message:'CSS font-size and text-size-adjust check',data:{htmlFontSize:htmlFontSize,bodyFontSize:bodyFontSize,textSizeAdjust:textSizeAdjust,innerWidth:viewportData.innerWidth,isTablet:viewportData.innerWidth >= 768},timestamp:Date.now(),sessionId:'debug-session',runId:'viewport-check',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            
+            // #region agent log - Hypothesis E: CSS transform scale on body
+            const bodyTransform = bodyStyle.transform;
+            const bodyScale = bodyTransform && bodyTransform !== 'none' ? bodyTransform : 'none';
+            fetch('http://127.0.0.1:7242/ingest/9b7c6f72-11df-457e-a521-b0316a2b2596',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'_Layout.cshtml:transform-check',message:'CSS transform scale check on body',data:{bodyTransform:bodyScale},timestamp:Date.now(),sessionId:'debug-session',runId:'viewport-check',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
+            
+            if (isZoomed) {
+                console.warn('Browser zoom level detected:', (zoomLevel * 100).toFixed(1) + '%');
+            }
+        })();
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+
+    @if (TempData["OrderSuccess"] != null)
+    {
+        <script>
+            function closeToast() {
+                const toast = document.getElementById('orderSuccessToast');
+                if (toast) {
+                    toast.classList.add('hide');
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }
+            
+            // Auto close after 5 seconds
+            setTimeout(closeToast, 5000);
+        </script>
+    }
+</body>
+</html>

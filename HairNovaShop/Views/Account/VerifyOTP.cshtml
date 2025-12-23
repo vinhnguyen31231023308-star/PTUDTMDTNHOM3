@@ -1,0 +1,131 @@
+@model HairNovaShop.Models.VerifyOTPViewModel
+@{
+    ViewData["Title"] = Model.Type == HairNovaShop.Models.OTPType.Registration ? "Xác thực đăng ký" : "Xác thực đặt lại mật khẩu";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <title>@ViewData["Title"] - HairNovaShop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="~/css/head.css" />
+    <link rel="stylesheet" href="~/css/account.css" />
+</head>
+<body>
+    <!-- Header (Partial View) -->
+    @await Html.PartialAsync("_Header")
+
+    <!-- Nền bong bóng -->
+    <div class="bg-bubbles">
+        <span class="bubble b1"></span>
+        <span class="bubble b2"></span>
+        <span class="bubble b3"></span>
+        <span class="bubble b4"></span>
+        <span class="bubble b5"></span>
+        <span class="bubble b6"></span>
+    </div>
+
+    <!-- CARD XÁC THỰC OTP -->
+    <div class="auth-wrapper">
+        <div class="auth-card auth-card-login">
+            <h1 class="auth-title">@(Model.Type == HairNovaShop.Models.OTPType.Registration ? "Xác thực đăng ký" : "Đặt lại mật khẩu")</h1>
+
+            <p class="forgot-desc">
+                Mã OTP đã được gửi đến email <strong>@Model.Email</strong><br>
+                Vui lòng nhập mã OTP để @(Model.Type == HairNovaShop.Models.OTPType.Registration ? "hoàn tất đăng ký" : "đặt lại mật khẩu").
+            </p>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+
+            <form class="auth-form" asp-action="VerifyOTP" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="Type" />
+                @if (Model.Type == HairNovaShop.Models.OTPType.Registration)
+                {
+                    <input type="hidden" asp-for="FullName" />
+                    <input type="hidden" asp-for="Phone" />
+                    <input type="hidden" asp-for="Password" />
+                    <input type="hidden" asp-for="ConfirmPassword" />
+                }
+
+                <div class="auth-input-group">
+                    <label asp-for="OTPCode">Mã OTP</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" asp-for="OTPCode" placeholder="Nhập mã OTP (6 chữ số)" maxlength="6" required style="text-align: center; letter-spacing: 8px; font-size: 20px; font-weight: bold;" id="otpInput" pattern="[0-9]{6}" />
+                    </div>
+                    <span asp-validation-for="OTPCode" class="text-danger"></span>
+                </div>
+
+                @if (Model.Type == HairNovaShop.Models.OTPType.ForgotPassword)
+                {
+                    <div class="auth-input-group">
+                        <label asp-for="NewPassword">Mật khẩu mới</label>
+                        <div class="auth-input-wrapper">
+                            <input type="password" asp-for="NewPassword" placeholder="Nhập mật khẩu mới" required />
+                        </div>
+                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="auth-input-group">
+                        <label asp-for="ConfirmNewPassword">Xác nhận mật khẩu mới</label>
+                        <div class="auth-input-wrapper">
+                            <input type="password" asp-for="ConfirmNewPassword" placeholder="Nhập lại mật khẩu mới" required />
+                        </div>
+                        <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                    </div>
+                }
+
+                <button type="submit" class="auth-btn">
+                    @(Model.Type == HairNovaShop.Models.OTPType.Registration ? "Xác thực và đăng ký" : "Xác thực và đặt lại mật khẩu")
+                </button>
+
+                <div class="auth-footer">
+                    <span>Chưa nhận được mã?</span>
+                    <a href="javascript:void(0)" id="resendOTP" class="auth-link-highlight">Gửi lại mã OTP</a>
+                </div>
+
+                <div class="auth-footer">
+                    <a asp-action="@(Model.Type == HairNovaShop.Models.OTPType.Registration ? "Register" : "ForgotPassword")" class="auth-link">Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/head.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Auto focus vào input OTP
+            const otpInput = document.getElementById('otpInput');
+            if (otpInput) {
+                otpInput.focus();
+                // Chỉ cho phép nhập số
+                otpInput.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+
+            // Resend OTP
+            document.getElementById('resendOTP')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Bạn có muốn gửi lại mã OTP không?')) {
+                    var url = '@Url.Action("ResendOTP", "Account")' + '?email=@Model.Email&type=@Model.Type';
+                    window.location.href = url;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

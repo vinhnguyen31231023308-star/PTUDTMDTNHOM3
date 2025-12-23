@@ -1,0 +1,53 @@
+@model HairNovaShop.Models.Product
+
+<a asp-controller="Product" asp-action="Detail" asp-route-id="@Model.Id" class="product-card" style="text-decoration: none; color: inherit;">
+    <div class="prod-img-box">
+        @if (Model.OnSale)
+        {
+            <span class="sale-badge" style="background: #e74c3c;">SALE</span>
+        }
+        @if (Model.IsNew)
+        {
+            <span class="sale-badge" style="background: #3498db; left: auto; right: 10px;">NEW</span>
+        }
+        @if (Model.IsFeatured)
+        {
+            <span class="sale-badge" style="background: #ffb524; top: 10px; left: 10px;">HOT</span>
+        }
+        @if (!string.IsNullOrEmpty(Model.MainImage))
+        {
+            <img src="@Model.MainImage" alt="@Model.Name" class="prod-img" onerror="this.src='/images/placeholder.png'">
+        }
+        else
+        {
+            <img src="/images/placeholder.png" alt="@Model.Name" class="prod-img">
+        }
+        <div class="action-icons">
+            <button class="action-btn wishlist-btn" type="button" data-product-id="@Model.Id" onclick="event.preventDefault(); toggleWishlist(@Model.Id, this);">
+                <i class="fa-regular fa-heart"></i>
+            </button>
+            <button class="action-btn" type="button" onclick="event.preventDefault(); addToCart(@Model.Id);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    <div class="prod-info">
+        <div class="info-top-row">
+            <div class="prod-cat">@(Model.Category?.Name ?? "Sản phẩm")</div>
+            @if (Model.Rating > 0)
+            {
+                <div class="prod-rating">★ @Model.Rating.ToString("F1")</div>
+            }
+        </div>
+        <h3 class="prod-name">@Model.Name</h3>
+        <div class="prod-price">
+            @Model.Price.ToString("N0")₫
+            @if (Model.OriginalPrice.HasValue && Model.OriginalPrice > Model.Price)
+            {
+                <del style="color: #999; font-size: 0.9em; margin-left: 8px;">@Model.OriginalPrice.Value.ToString("N0")₫</del>
+            }
+        </div>
+    </div>
+</a>

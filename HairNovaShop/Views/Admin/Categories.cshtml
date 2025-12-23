@@ -1,0 +1,120 @@
+@model IEnumerable<HairNovaShop.Models.Category>
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1>Quản lý danh mục</h1>
+        <p>Quản lý các danh mục sản phẩm trong hệ thống</p>
+    </div>
+    <a asp-action="CreateCategory" class="btn admin-btn-primary">
+        <i class="fas fa-plus me-2"></i>Thêm danh mục mới
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">Danh sách danh mục</h2>
+        <div class="input-group" style="width: 300px;">
+            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+            <input type="text" id="searchInput" class="form-control" placeholder="Tìm tên danh mục, mô tả...">
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model)
+                {
+                    <tr>
+                        <td>@category.Id</td>
+                        <td><strong>@category.Name</strong></td>
+                        <td>@(category.Description ?? "-")</td>
+                        <td>
+                            @if (category.IsActive)
+                            {
+                                <span class="badge bg-success">Hoạt động</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Tạm dừng</span>
+                            }
+                        </td>
+                        <td>@category.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-action="EditCategory" asp-route-id="@category.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> Chỉnh sửa
+                                </a>
+                                <form asp-action="DeleteCategory" asp-route-id="@category.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i> Xóa
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        tableRows.forEach(row => {
+            const categoryName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+            const description = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+            const id = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+            
+            const matchesSearch = categoryName.includes(searchTerm) || 
+                                  description.includes(searchTerm) ||
+                                  id.includes(searchTerm);
+            
+            if (matchesSearch) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        const noResultsRow = document.getElementById('noResultsRow');
+        if (visibleCount === 0 && tableRows.length > 0) {
+            if (!noResultsRow) {
+                const tbody = document.querySelector('tbody');
+                const newRow = document.createElement('tr');
+                newRow.id = 'noResultsRow';
+                newRow.innerHTML = '<td colspan="6" class="text-center py-4 text-muted"><i class="fas fa-search me-2"></i>Không tìm thấy danh mục phù hợp</td>';
+                tbody.appendChild(newRow);
+            }
+        } else if (noResultsRow) {
+            noResultsRow.remove();
+        }
+    }
+    
+    searchInput.addEventListener('input', filterTable);
+});
+</script>
+}

@@ -1,0 +1,281 @@
+@{
+    ViewData["Title"] = "Tin tức";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/news.css" asp-append-version="true" />
+}
+
+<main class="news-page container">
+    <!-- HEADER + SEARCH -->
+    <section class="news-header">
+        <div class="news-header-title">
+            <h1>Tin tức &amp; bí quyết chăm tóc</h1>
+            <p>
+                Cập nhật xu hướng, routine và review sản phẩm giúp bạn nuôi dưỡng mái tóc khỏe đẹp mỗi ngày.
+            </p>
+        </div>
+
+        <div class="news-search-wrapper">
+            <div class="news-search">
+                <input id="news-search-input"
+                       type="text"
+                       placeholder="Nhập tên bài viết, ví dụ: dầu gội cho tóc khô..." />
+                <div class="news-search-icon">🔍</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LAYOUT -->
+    <section class="news-layout">
+        <!-- SIDEBAR -->
+        <aside>
+            <!-- Danh mục -->
+            <div class="sidebar-card news-categories">
+                <div class="sidebar-title">Danh mục tin tức</div>
+                <ul>
+                    <li>
+                        Hướng dẫn chăm sóc tóc hư tổn
+                        <span>12 bài</span>
+                    </li>
+                    <li>
+                        Routine theo tình trạng tóc
+                        <span>8 bài</span>
+                    </li>
+                    <li>
+                        Review sản phẩm nổi bật
+                        <span>10 bài</span>
+                    </li>
+                    <li>
+                        Góc chuyên gia HairNova
+                        <span>6 bài</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tin nổi bật -->
+            <div class="sidebar-card">
+                <div class="sidebar-title">Tin nổi bật</div>
+                <ul class="featured-list">
+                    <li class="featured-item">
+                        <div class="featured-thumb">
+                            <img src="~/images/imgnews/banner-new1.jpg" alt="7 bước phục hồi tóc hư tổn" />
+                        </div>
+                        <div class="featured-content">
+                            <div class="featured-title">7 bước phục hồi tóc hư tổn trong 4 tuần</div>
+                            <div class="featured-meta">Chăm sóc tóc hư tổn • 02/10/2025</div>
+                        </div>
+                    </li>
+
+                    <li class="featured-item">
+                        <div class="featured-thumb">
+                            <img src="~/images/imgnews/banner-new2.jpg" alt="Tóc dầu & bết" />
+                        </div>
+                        <div class="featured-content">
+                            <div class="featured-title">Giải mã nguyên nhân khiến tóc luôn dầu &amp; bết</div>
+                            <div class="featured-meta">Routine theo da đầu • 15/09/2025</div>
+                        </div>
+                    </li>
+
+                    <li class="featured-item">
+                        <div class="featured-thumb">
+                            <img src="~/images/imgnews/banner-new4.jpg" alt="Serum dưỡng tóc" />
+                        </div>
+                        <div class="featured-content">
+                            <div class="featured-title">Serum dưỡng tóc: Chọn sao cho đúng chất tóc?</div>
+                            <div class="featured-meta">Review sản phẩm • 07/09/2025</div>
+                        </div>
+                    </li>
+
+                    <li class="featured-item">
+                        <div class="featured-thumb">
+                            <img src="~/images/imgnews/banner-new6.jpg" alt="Nhuộm tóc" />
+                        </div>
+                        <div class="featured-content">
+                            <div class="featured-title">5 lưu ý trước khi nhuộm tóc để không bị khô xơ</div>
+                            <div class="featured-meta">Góc chuyên gia • 30/08/2025</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- MAIN LIST -->
+        <section class="news-main">
+            <div class="news-grid">
+                <!-- Card 1 -->
+                <article class="news-card" data-title="routine phục hồi tóc sau khi uốn duỗi nhuộm">
+                    <div class="news-card-media">
+                        <img src="~/images/imgnews/banner-new1.jpg" alt="Routine phục hồi tóc sau hóa chất" />
+                        <div class="news-date-badge">
+                            <span>15/10/2025</span>
+                        </div>
+                    </div>
+                    <div class="news-card-body">
+                        <div class="news-category-pill">Chăm sóc tóc hư tổn</div>
+                        <h2 class="news-card-title">
+                            Routine phục hồi tóc sau khi uốn, duỗi, nhuộm: Hạn chế khô xơ &amp; gãy rụng
+                        </h2>
+                        <p class="news-card-excerpt">
+                            Hóa chất tạo kiểu giúp tóc đẹp tức thời nhưng cũng làm lớp biểu bì bị tổn thương. Bài viết này gợi ý
+                            routine phục hồi 4 bước giúp mái tóc lấy lại độ bóng mượt, đàn hồi mà không cần ra salon quá nhiều.
+                        </p>
+                        <div class="news-card-footer">
+                            <div class="news-author">HairNova Team</div>
+                            <button class="news-readmore-btn">
+                                Xem thêm
+                                <span class="arrow">↗</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 2 -->
+                <article class="news-card" data-title="tóc dầu bết nhanh chọn dầu gội thế nào">
+                    <div class="news-card-media">
+                        <img src="~/images/imgnews/banner-new2.jpg" alt="Dầu gội cho tóc dầu" />
+                        <div class="news-date-badge">
+                            <span>10/10/2025</span>
+                        </div>
+                    </div>
+                    <div class="news-card-body">
+                        <div class="news-category-pill">Routine theo tình trạng tóc</div>
+                        <h2 class="news-card-title">
+                            Tóc dầu &amp; bết nhanh: Chọn dầu gội thế nào để da đầu sạch nhưng không khô?
+                        </h2>
+                        <p class="news-card-excerpt">
+                            Nếu chỉ sau 1 ngày gội mà tóc đã bết lại, rất có thể bạn đang dùng sai loại dầu gội. Cùng HairNova tìm
+                            hiểu tỉ lệ chất hoạt động bề mặt, độ pH và các thành phần nên có trong dầu gội dành cho tóc dầu.
+                        </p>
+                        <div class="news-card-footer">
+                            <div class="news-author">Bác sĩ da liễu Hà My</div>
+                            <button class="news-readmore-btn">
+                                Xem thêm
+                                <span class="arrow">↗</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 3 -->
+                <article class="news-card" data-title="ủ tóc tại nhà bằng hair mask">
+                    <div class="news-card-media">
+                        <img src="~/images/imgnews/banner-new3.jpg" alt="Hair mask" />
+                        <div class="news-date-badge">
+                            <span>05/10/2025</span>
+                        </div>
+                    </div>
+                    <div class="news-card-body">
+                        <div class="news-category-pill">Mặt nạ &amp; ủ tóc</div>
+                        <h2 class="news-card-title">
+                            Ủ tóc tại nhà bằng hair mask: Bao lâu một lần là đủ để không bị bết nặng?
+                        </h2>
+                        <p class="news-card-excerpt">
+                            Dùng hair mask quá dày hoặc quá thường xuyên có thể khiến tóc nặng và nhanh bết. HairNova gợi ý cách
+                            chọn texture, thời gian ủ và tần suất sử dụng phù hợp cho từng chất tóc.
+                        </p>
+                        <div class="news-card-footer">
+                            <div class="news-author">HairNova Blog</div>
+                            <button class="news-readmore-btn">
+                                Xem thêm
+                                <span class="arrow">↗</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 4 -->
+                <article class="news-card" data-title="so sánh 3 loại serum dưỡng tóc bán chạy">
+                    <div class="news-card-media">
+                        <img src="~/images/imgnews/banner-new4.jpg" alt="Serum dưỡng tóc" />
+                        <div class="news-date-badge">
+                            <span>28/09/2025</span>
+                        </div>
+                    </div>
+                    <div class="news-card-body">
+                        <div class="news-category-pill">Review sản phẩm</div>
+                        <h2 class="news-card-title">
+                            So sánh 3 loại serum dưỡng tóc bán chạy tại HairNova: Tóc khô – tóc nhuộm – tóc gãy rụng
+                        </h2>
+                        <p class="news-card-excerpt">
+                            Mỗi loại serum được thiết kế cho một nhu cầu khác nhau. Bảng so sánh chi tiết về thành phần, mùi hương,
+                            độ bóng và khả năng giảm xơ rối sẽ giúp bạn chọn được "chân ái" cho mái tóc.
+                        </p>
+                        <div class="news-card-footer">
+                            <div class="news-author">HairNova Review</div>
+                            <button class="news-readmore-btn">
+                                Xem thêm
+                                <span class="arrow">↗</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 5 -->
+                <article class="news-card" data-title="chải tóc đúng cách 4 lỗi sai khiến tóc gãy rụng">
+                    <div class="news-card-media">
+                        <img src="~/images/imgnews/banner-new5.jpg" alt="Chải tóc đúng cách" />
+                        <div class="news-date-badge">
+                            <span>20/09/2025</span>
+                        </div>
+                    </div>
+                    <div class="news-card-body">
+                        <div class="news-category-pill">Thói quen hàng ngày</div>
+                        <h2 class="news-card-title">
+                            Chải tóc cũng cần đúng cách: 4 lỗi sai khiến tóc gãy rụng nhiều hơn mỗi ngày
+                        </h2>
+                        <p class="news-card-excerpt">
+                            Chải tóc khi còn ướt, dùng lược răng quá dày hay kéo mạnh từ chân tóc là những nguyên nhân khiến tóc rụng
+                            không kiểm soát. Cùng xem chuyên gia HairNova hướng dẫn cách chải tóc "nhẹ mà chắc".
+                        </p>
+                        <div class="news-card-footer">
+                            <div class="news-author">Stylist Quỳnh Như</div>
+                            <button class="news-readmore-btn">
+                                Xem thêm
+                                <span class="arrow">↗</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Card 6 -->
+                <article class="news-card" data-title="7 mẹo giữ màu tóc nhuộm lâu phai">
+                    <div class="news-card-media">
+                        <img src="~/images/imgnews/banner-new6.jpg" alt="Tóc nhuộm" />
+                        <div class="news-date-badge">
+                            <span>15/09/2025</span>
+                        </div>
+                    </div>
+                    <div class="news-card-body">
+                        <div class="news-category-pill">Tóc nhuộm</div>
+                        <h2 class="news-card-title">
+                            7 mẹo giữ màu tóc nhuộm lâu phai mà vẫn bóng khỏe, không cần tẩy lại liên tục
+                        </h2>
+                        <p class="news-card-excerpt">
+                            Từ nhiệt độ nước gội, loại dầu gội nên tránh cho tới khoảng cách giữa các lần dùng máy kẹp – tất cả đều
+                            ảnh hưởng đến độ bền màu. Đây là checklist giúp bạn giữ màu tóc nhuộm đẹp lâu hơn.
+                        </p>
+                        <div class="news-card-footer">
+                            <div class="news-author">HairNova Studio</div>
+                            <button class="news-readmore-btn">
+                                Xem thêm
+                                <span class="arrow">↗</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- PAGINATION -->
+            <nav class="news-pagination" aria-label="Pagination">
+                <div class="page-item active">1</div>
+                <div class="page-item">2</div>
+                <div class="page-item">3</div>
+            </nav>
+        </section>
+    </section>
+</main>
+
+@section Scripts {
+    <script src="~/js/news.js" asp-append-version="true"></script>
+}

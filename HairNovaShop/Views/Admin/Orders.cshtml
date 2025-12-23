@@ -1,0 +1,400 @@
+@model List<HairNovaShop.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header">
+    <h1>Quản lý đơn hàng</h1>
+    <p>Danh sách tất cả đơn hàng trong hệ thống</p>
+</div>
+
+<!-- Status Flow Guide -->
+<div class="alert alert-info mb-4">
+    <h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Quy trình trạng thái đơn hàng:</h6>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+        <span class="badge bg-warning">Chờ xác nhận</span>
+        <i class="fas fa-arrow-right text-muted"></i>
+        <span class="badge bg-info">Đã xác nhận</span>
+        <i class="fas fa-arrow-right text-muted"></i>
+        <span class="badge bg-primary">Đang giao hàng</span>
+        <i class="fas fa-arrow-right text-muted"></i>
+        <span class="badge bg-success">Hoàn thành</span>
+        <span class="ms-3 text-muted">|</span>
+        <span class="badge bg-danger ms-2">Hủy đơn</span>
+        <span class="text-muted small">(có thể hủy ở bất kỳ bước nào trước khi hoàn thành)</span>
+    </div>
+</div>
+
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h2 class="admin-card-title">Danh sách đơn hàng</h2>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="input-group" style="width: 300px;">
+                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Tìm mã đơn, khách hàng, SĐT...">
+            </div>
+            <select id="statusFilter" class="form-select" style="width: 180px;">
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed">Đã xác nhận</option>
+                <option value="shipping">Đang giao hàng</option>
+                <option value="completed">Hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+            </select>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Khách hàng</th>
+                    <th>Số điện thoại</th>
+                    <th>Tổng tiền</th>
+                    <th>Phương thức TT</th>
+                    <th style="min-width: 200px;">Trạng thái</th>
+                    <th>Ngày đặt</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var order in Model)
+                    {
+                        <tr id="order-row-@order.Id">
+                            <td><strong>@order.OrderCode</strong></td>
+                            <td>@order.CustomerName</td>
+                            <td>@order.CustomerPhone</td>
+                            <td><strong class="text-success">@order.Total.ToString("N0") đ</strong></td>
+                            <td>
+                                @{
+                                    var paymentMethodName = order.PaymentMethod switch
+                                    {
+                                        "cod" => "COD",
+                                        "bank" => "Chuyển khoản",
+                                        "momo" => "MoMo",
+                                        "vnpay" => "VNPAY",
+                                        _ => order.PaymentMethod
+                                    };
+                                    var paymentIcon = order.PaymentMethod switch
+                                    {
+                                        "cod" => "fa-money-bill",
+                                        "bank" => "fa-university",
+                                        "momo" => "fa-wallet",
+                                        "vnpay" => "fa-credit-card",
+                                        _ => "fa-money-bill"
+                                    };
+                                }
+                                <i class="fas @paymentIcon me-1"></i>@paymentMethodName
+                            </td>
+                            <td>
+                                @{
+                                    var isDisabled = order.Status == "completed" || order.Status == "cancelled";
+                                    var selectClass = "form-select form-select-sm status-select" + (isDisabled ? " disabled-status" : "");
+                                }
+                                @if (isDisabled)
+                                {
+                                    <select class="@selectClass" data-order-id="@order.Id" data-current-status="@order.Status" disabled>
+                                        @if (order.Status == "pending") { <option value="pending" selected>⏳ Chờ xác nhận</option> } else { <option value="pending">⏳ Chờ xác nhận</option> }
+                                        @if (order.Status == "confirmed") { <option value="confirmed" selected>✅ Đã xác nhận</option> } else { <option value="confirmed">✅ Đã xác nhận</option> }
+                                        @if (order.Status == "shipping") { <option value="shipping" selected>🚚 Đang giao hàng</option> } else { <option value="shipping">🚚 Đang giao hàng</option> }
+                                        @if (order.Status == "completed") { <option value="completed" selected>🎉 Hoàn thành</option> } else { <option value="completed">🎉 Hoàn thành</option> }
+                                        @if (order.Status == "cancelled") { <option value="cancelled" selected>❌ Đã hủy</option> } else { <option value="cancelled">❌ Đã hủy</option> }
+                                    </select>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="fas fa-lock"></i> Không thể thay đổi
+                                    </small>
+                                }
+                                else
+                                {
+                                    <select class="@selectClass" data-order-id="@order.Id" data-current-status="@order.Status">
+                                        @if (order.Status == "pending") { <option value="pending" selected>⏳ Chờ xác nhận</option> } else { <option value="pending">⏳ Chờ xác nhận</option> }
+                                        @if (order.Status == "confirmed") { <option value="confirmed" selected>✅ Đã xác nhận</option> } else { <option value="confirmed">✅ Đã xác nhận</option> }
+                                        @if (order.Status == "shipping") { <option value="shipping" selected>🚚 Đang giao hàng</option> } else { <option value="shipping">🚚 Đang giao hàng</option> }
+                                        @if (order.Status == "completed") { <option value="completed" selected>🎉 Hoàn thành</option> } else { <option value="completed">🎉 Hoàn thành</option> }
+                                        @if (order.Status == "cancelled") { <option value="cancelled" selected>❌ Đã hủy</option> } else { <option value="cancelled">❌ Đã hủy</option> }
+                                    </select>
+                                }
+                            </td>
+                            <td>
+                                <small>@order.CreatedAt.ToString("dd/MM/yyyy")</small><br>
+                                <small class="text-muted">@order.CreatedAt.ToString("HH:mm")</small>
+                            </td>
+                            <td>
+                                <a asp-action="OrderDetails" asp-route-id="@order.Id" class="btn btn-sm btn-outline-info" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">Chưa có đơn hàng nào.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 70px;"></div>
+
+@section Styles {
+<style>
+    .status-select {
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .status-select:focus {
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
+    .status-select.disabled-status {
+        background-color: #f8f9fa;
+        opacity: 0.8;
+        cursor: not-allowed;
+    }
+    .status-select option[value="pending"] { background: #fff3cd; }
+    .status-select option[value="confirmed"] { background: #d1ecf1; }
+    .status-select option[value="shipping"] { background: #cfe2ff; }
+    .status-select option[value="completed"] { background: #d1e7dd; }
+    .status-select option[value="cancelled"] { background: #f8d7da; }
+    
+    /* Toast Styles */
+    .admin-toast {
+        min-width: 350px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+        animation: slideIn 0.4s ease;
+    }
+    .admin-toast.success {
+        border-left: 4px solid #22c55e;
+    }
+    .admin-toast.error {
+        border-left: 4px solid #ef4444;
+    }
+    .admin-toast .toast-header {
+        background: #fff;
+        border-bottom: none;
+        padding: 12px 16px 8px;
+    }
+    .admin-toast .toast-body {
+        padding: 8px 16px 16px;
+    }
+    .admin-toast.success .toast-icon {
+        color: #22c55e;
+    }
+    .admin-toast.error .toast-icon {
+        color: #ef4444;
+    }
+    .toast-progress {
+        height: 3px;
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+        animation: progressShrink 5s linear forwards;
+    }
+    .admin-toast.error .toast-progress {
+        background: linear-gradient(90deg, #ef4444, #dc2626);
+    }
+    
+    @@keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @@keyframes progressShrink {
+        from { width: 100%; }
+        to { width: 0%; }
+    }
+    
+    /* Loading overlay */
+    .status-loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.6;
+    }
+    .status-loading::after {
+        content: '';
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ddd;
+        border-top-color: #0d6efd;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @@keyframes spin {
+        to { transform: translateY(-50%) rotate(360deg); }
+    }
+</style>
+}
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle status change
+    document.querySelectorAll('.status-select').forEach(select => {
+        select.addEventListener('change', async function() {
+            const orderId = this.dataset.orderId;
+            const currentStatus = this.dataset.currentStatus;
+            const newStatus = this.value;
+            
+            // Confirm cancellation
+            if (newStatus === 'cancelled') {
+                if (!confirm('Bạn có chắc chắn muốn HỦY đơn hàng này? Hành động này không thể hoàn tác!')) {
+                    this.value = currentStatus;
+                    return;
+                }
+            }
+            
+            // Confirm completion
+            if (newStatus === 'completed') {
+                if (!confirm('Xác nhận đơn hàng đã HOÀN THÀNH? Sau khi hoàn thành sẽ không thể thay đổi trạng thái!')) {
+                    this.value = currentStatus;
+                    return;
+                }
+            }
+            
+            // Show loading state
+            this.classList.add('status-loading');
+            this.disabled = true;
+            
+            try {
+                const response = await fetch('@Url.Action("UpdateOrderStatus", "Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${orderId}&status=${newStatus}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update the current status data attribute
+                    this.dataset.currentStatus = newStatus;
+                    
+                    // If completed or cancelled, disable the select
+                    if (newStatus === 'completed' || newStatus === 'cancelled') {
+                        this.disabled = true;
+                        this.classList.add('disabled-status');
+                        
+                        // Add lock message
+                        const lockMsg = document.createElement('small');
+                        lockMsg.className = 'text-muted d-block mt-1';
+                        lockMsg.innerHTML = '<i class="fas fa-lock"></i> Không thể thay đổi';
+                        this.parentNode.appendChild(lockMsg);
+                    }
+                    
+                    showToast('success', 'Thành công!', result.message);
+                } else {
+                    // Revert to previous value
+                    this.value = currentStatus;
+                    showToast('error', 'Lỗi!', result.message);
+                }
+            } catch (error) {
+                // Revert to previous value
+                this.value = currentStatus;
+                showToast('error', 'Lỗi!', 'Có lỗi xảy ra khi cập nhật trạng thái. Vui lòng thử lại!');
+            } finally {
+                this.classList.remove('status-loading');
+                if (this.dataset.currentStatus !== 'completed' && this.dataset.currentStatus !== 'cancelled') {
+                    this.disabled = false;
+                }
+            }
+        });
+    });
+    
+    // Search and Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const tableRows = document.querySelectorAll('tbody tr[id^="order-row-"]');
+    
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const statusValue = statusFilter.value;
+        let visibleCount = 0;
+        
+        tableRows.forEach(row => {
+            const orderCode = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+            const customerName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+            const phone = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+            const currentStatus = row.querySelector('.status-select')?.dataset.currentStatus || '';
+            
+            const matchesSearch = orderCode.includes(searchTerm) || 
+                                  customerName.includes(searchTerm) || 
+                                  phone.includes(searchTerm);
+            const matchesStatus = !statusValue || currentStatus === statusValue;
+            
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        const noResultsRow = document.getElementById('noResultsRow');
+        if (visibleCount === 0 && tableRows.length > 0) {
+            if (!noResultsRow) {
+                const tbody = document.querySelector('tbody');
+                const newRow = document.createElement('tr');
+                newRow.id = 'noResultsRow';
+                newRow.innerHTML = '<td colspan="8" class="text-center py-4 text-muted"><i class="fas fa-search me-2"></i>Không tìm thấy kết quả phù hợp</td>';
+                tbody.appendChild(newRow);
+            }
+        } else if (noResultsRow) {
+            noResultsRow.remove();
+        }
+    }
+    
+    searchInput.addEventListener('input', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+
+    // Toast function
+    function showToast(type, title, message) {
+        const container = document.getElementById('toastContainer');
+        const toastId = 'toast-' + Date.now();
+        
+        const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        const toastHtml = `
+            <div id="${toastId}" class="toast admin-toast ${type}" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="fas ${iconClass} toast-icon me-2 fs-5"></i>
+                    <strong class="me-auto">${title}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <div class="toast-progress"></div>
+            </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', toastHtml);
+        
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 5000 });
+        toast.show();
+        
+        // Remove toast element after it's hidden
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+});
+</script>
+}

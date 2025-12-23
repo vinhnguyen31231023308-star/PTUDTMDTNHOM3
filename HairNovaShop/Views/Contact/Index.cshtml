@@ -1,0 +1,152 @@
+@{
+    ViewData["Title"] = "Liên hệ";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/contact.css" asp-append-version="true" />
+}
+
+<section class="contact-section">
+    <section class="hero container text-center">
+        <img src="~/images/imgcontact/anh1.png" class="avatar float-1 hidden-up delay-100" alt="User 1">
+        <img src="~/images/imgcontact/anh2.png" class="avatar float-2 hidden-up delay-300" alt="User 2">
+        <img src="~/images/imgcontact/anh3.png" class="avatar float-3 hidden-up delay-500" alt="User 3">
+        <h1 class="section-title hidden-up">HairNova Nơi Mái Tóc Được Yêu Thương <br> Liên Hệ Ngay</h1>
+        <p class="hero-desc hidden-up delay-100">Đừng ngần ngại liên hệ với chúng tôi để được phục vụ chu đáo nhất.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary hidden-up delay-200">Khám phá ngay</a>
+
+        <div class="hero-visuals hidden-up delay-300">
+            <div class="visual-card left">
+                <img src="~/images/imgcontact/anh4.png" alt="Hair Salon">
+            </div>
+
+            <div class="visual-card center-card contact-info-card">
+                <div class="contact-item">
+                    <div class="icon-box"><i class="fa-solid fa-location-dot"></i></div>
+                    <div class="info">
+                        <strong>Địa chỉ:</strong>
+                        <p>279 Nguyễn Tri Phương, phường Diên Hồng, TP. Hồ Chí Minh</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="icon-box"><i class="fa-solid fa-phone"></i></div>
+                    <div class="info">
+                        <strong>Hotline:</strong>
+                        <p><a href="tel:0343018741">0343.018.741</a></p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="icon-box"><i class="fa-solid fa-envelope"></i></div>
+                    <div class="info">
+                        <strong>Email:</strong>
+                        <p><a href="mailto:hairnova.shop.ueh@gmail.com">hairnova.shop.ueh@gmail.com</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visual-card right">
+                <img src="~/images/imgcontact/anh5.png" alt="Hair Styling">
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-advanced-section hidden-up delay-300">
+        <div class="container">
+            <div class="contact-layout-grid">
+                <div class="contact-info-col">
+                    <h2 class="section-title">Liên hệ với chúng tôi</h2>
+                    <p class="section-desc">
+                        Gửi email, gọi điện hoặc điền vào biểu mẫu để tìm hiểu cách HairNova có thể giúp mái tóc của bạn trở nên tuyệt vời hơn.
+                    </p>
+
+                    <div class="direct-contact-links">
+                        <a href="mailto:hairnova.shop.ueh@gmail.com">hairnova.shop.ueh@gmail.com</a>
+                        <a href="tel:0343018741">0343.018.741</a>
+                    </div>
+
+                    <div class="sub-info-grid">
+                        <div class="sub-item">
+                            <h4>Hỗ trợ khách hàng</h4>
+                            <p>Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giải đáp mọi thắc mắc của bạn.</p>
+                        </div>
+                        <div class="sub-item">
+                            <h4>Phản hồi & Góp ý</h4>
+                            <p>Chúng tôi luôn trân trọng ý kiến của bạn để cải thiện HairNova ngày càng tốt hơn.</p>
+                        </div>
+                        <div class="sub-item">
+                            <h4>Hợp tác truyền thông</h4>
+                            <p>Đối với các câu hỏi liên quan đến báo chí, vui lòng liên hệ email của chúng tôi.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form-col">
+                    <div class="form-card-white">
+                        <h3>Gửi lời nhắn</h3>
+                        <p class="form-sub">Bạn có thể liên hệ bất cứ lúc nào</p>
+
+                        <form action="#" class="hairnova-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Tên" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" placeholder="Họ" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <input type="email" placeholder="Địa chỉ Email của bạn" required>
+                            </div>
+
+                            <div class="form-group phone-group">
+                                <span class="country-code">+84</span>
+                                <input type="tel" placeholder="Số điện thoại" required>
+                            </div>
+
+                            <div class="form-group">
+                                <textarea placeholder="Chúng tôi có thể giúp gì cho bạn?" rows="4"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">Gửi ngay</button>
+
+                            <p class="form-policy">
+                                Bằng cách liên hệ, bạn đồng ý với <a asp-controller="Policy" asp-action="Index">Điều khoản dịch vụ</a> và <a asp-controller="Policy" asp-action="Index">Chính sách bảo mật</a> của chúng tôi.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonial-section hidden-up delay-200">
+        <div class="container">
+            <div class="testimonial-card">
+                <div class="stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+
+                <h3 class="quote-text">
+                    "Là một chủ Salon, tôi đã thử nhiều dòng sản phẩm — nhưng HairNova thực sự khác biệt. Các sản phẩm chăm sóc tóc trở nên dễ dàng, khách hàng quay lại nhiều hơn nhờ chất lượng vượt trội. Rất hài lòng!"
+                </h3>
+
+                <div class="author-info">
+                    <img src="~/images/imgcontact/anh6.jpg" alt="Customer" class="author-avatar">
+                    <div class="author-details">
+                        <span class="author-name">Trần Mai Anh</span>
+                        <span class="author-role">Khách hàng thân thiết</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+@section Scripts {
+    <script src="~/js/contact.js" asp-append-version="true"></script>
+}

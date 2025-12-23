@@ -1,0 +1,251 @@
+@{
+    ViewData["Title"] = "Trang chủ quản trị";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header">
+    <h1>Trang chủ quản trị</h1>
+    <p>Chào mừng đến với hệ thống quản trị HairNovaShop</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="admin-stats-grid mb-4">
+    <div class="admin-stat-card">
+        <div class="admin-stat-card-header">
+            <div>
+                <p class="admin-stat-card-title">Tổng khách hàng</p>
+                <h3 class="admin-stat-card-value">@ViewBag.TotalCustomers</h3>
+            </div>
+            <div class="admin-stat-card-icon primary">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+        <p class="admin-stat-card-footer">
+            @{
+                var customerGrowthClass = ViewBag.CustomerGrowth >= 0 ? "text-success" : "text-danger";
+                var customerGrowthIcon = ViewBag.CustomerGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down";
+            }
+            <span class="@customerGrowthClass">
+                <i class="fas @customerGrowthIcon"></i> @Math.Abs(ViewBag.CustomerGrowth)%
+            </span>
+            so với tháng trước (@ViewBag.NewCustomersThisMonth khách hàng mới tháng này)
+        </p>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-card-header">
+            <div>
+                <p class="admin-stat-card-title">Tổng đơn hàng</p>
+                <h3 class="admin-stat-card-value">@ViewBag.TotalOrders</h3>
+            </div>
+            <div class="admin-stat-card-icon success">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+        </div>
+        <p class="admin-stat-card-footer">
+            @{
+                var orderGrowthClass = ViewBag.OrderGrowth >= 0 ? "text-success" : "text-danger";
+                var orderGrowthIcon = ViewBag.OrderGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down";
+            }
+            <span class="@orderGrowthClass">
+                <i class="fas @orderGrowthIcon"></i> @Math.Abs(ViewBag.OrderGrowth)%
+            </span>
+            so với tháng trước (@ViewBag.OrdersThisMonth đơn hàng tháng này)
+        </p>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-card-header">
+            <div>
+                <p class="admin-stat-card-title">Tổng sản phẩm</p>
+                <h3 class="admin-stat-card-value">@ViewBag.TotalProducts</h3>
+            </div>
+            <div class="admin-stat-card-icon warning">
+                <i class="fas fa-box"></i>
+            </div>
+        </div>
+        <p class="admin-stat-card-footer">
+            @{
+                var productGrowthClass = ViewBag.ProductGrowth >= 0 ? "text-success" : "text-danger";
+                var productGrowthIcon = ViewBag.ProductGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down";
+            }
+            <span class="@productGrowthClass">
+                <i class="fas @productGrowthIcon"></i> @Math.Abs(ViewBag.ProductGrowth)%
+            </span>
+            so với tháng trước (@ViewBag.ProductsThisMonth sản phẩm mới tháng này)
+        </p>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-card-header">
+            <div>
+                <p class="admin-stat-card-title">Tổng doanh thu</p>
+                <h3 class="admin-stat-card-value">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) đ</h3>
+            </div>
+            <div class="admin-stat-card-icon info">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+        </div>
+        <p class="admin-stat-card-footer">
+            @{
+                var revenueGrowthClass = ViewBag.RevenueGrowth >= 0 ? "text-success" : "text-danger";
+                var revenueGrowthIcon = ViewBag.RevenueGrowth >= 0 ? "fa-arrow-up" : "fa-arrow-down";
+            }
+            <span class="@revenueGrowthClass">
+                <i class="fas @revenueGrowthIcon"></i> @Math.Abs(ViewBag.RevenueGrowth)%
+            </span>
+            so với tháng trước (@(((decimal)ViewBag.RevenueThisMonth).ToString("N0")) đ tháng này)
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">Đơn hàng gần đây</h2>
+                <a asp-controller="Admin" asp-action="Orders" class="btn btn-sm admin-btn-primary">Xem tất cả</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var recentOrders = ViewBag.RecentOrders as List<Dictionary<string, object>>;
+                        }
+                        @if (recentOrders != null && recentOrders.Count > 0)
+                        {
+                            @foreach (var order in recentOrders)
+                            {
+                                <tr>
+                                    <td><strong>@order["OrderCode"]</strong></td>
+                                    <td>@order["CustomerName"]</td>
+                                    <td>@(((DateTime)order["CreatedAt"]).ToString("dd/MM/yyyy HH:mm"))</td>
+                                    <td><strong class="text-success">@(((decimal)order["Total"]).ToString("N0")) đ</strong></td>
+                                    <td>
+                                        @{
+                                            var status = order["Status"].ToString();
+                                            var statusClass = status switch
+                                            {
+                                                "completed" => "bg-success",
+                                                "shipping" => "bg-primary",
+                                                "confirmed" => "bg-info",
+                                                "pending" => "bg-warning",
+                                                "cancelled" => "bg-danger",
+                                                _ => "bg-secondary"
+                                            };
+                                            var statusName = status switch
+                                            {
+                                                "completed" => "Hoàn thành",
+                                                "shipping" => "Đang giao",
+                                                "confirmed" => "Đã xác nhận",
+                                                "pending" => "Chờ xác nhận",
+                                                "cancelled" => "Đã hủy",
+                                                _ => status
+                                            };
+                                        }
+                                        <span class="badge @statusClass">@statusName</span>
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Admin" asp-action="OrderDetails" asp-route-id="@order["Id"]" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Chưa có đơn hàng nào</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="admin-card mb-3">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">Thống kê nhanh</h2>
+            </div>
+            <div class="list-group list-group-flush">
+                <a asp-controller="Admin" asp-action="Products" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="fas fa-box me-2 text-primary"></i>Quản lý sản phẩm</h6>
+                            <small class="text-muted">Quản lý danh sách sản phẩm</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">@ViewBag.TotalProducts</span>
+                    </div>
+                </a>
+                <a asp-controller="Admin" asp-action="Users" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="fas fa-users me-2 text-success"></i>Quản lý khách hàng</h6>
+                            <small class="text-muted">Quản lý tài khoản khách hàng</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">@ViewBag.TotalCustomers</span>
+                    </div>
+                </a>
+                <a asp-controller="Admin" asp-action="Orders" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="fas fa-shopping-cart me-2 text-warning"></i>Quản lý đơn hàng</h6>
+                            <small class="text-muted">Xem và quản lý đơn hàng</small>
+                        </div>
+                        <span class="badge bg-warning rounded-pill">@ViewBag.TotalOrders</span>
+                    </div>
+                </a>
+                <a asp-controller="Admin" asp-action="Categories" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="fas fa-tags me-2 text-info"></i>Quản lý danh mục</h6>
+                            <small class="text-muted">Quản lý danh mục sản phẩm</small>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+                <a asp-controller="Admin" asp-action="Reports" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1"><i class="fas fa-chart-bar me-2 text-danger"></i>Thống kê báo cáo</h6>
+                            <small class="text-muted">Xem báo cáo và thống kê</small>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h2 class="admin-card-title">Hành động nhanh</h2>
+            </div>
+            <div class="admin-card-body">
+                <div class="d-grid gap-2">
+                    <a asp-controller="Admin" asp-action="CreateProduct" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Thêm sản phẩm mới
+                    </a>
+                    <a asp-controller="Admin" asp-action="CreateCategory" class="btn btn-outline-primary">
+                        <i class="fas fa-tag me-2"></i>Thêm danh mục mới
+                    </a>
+                    <a asp-controller="Admin" asp-action="CreateUser" class="btn btn-outline-secondary">
+                        <i class="fas fa-user-plus me-2"></i>Thêm tài khoản mới
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

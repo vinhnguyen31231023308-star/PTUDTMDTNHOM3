@@ -1,0 +1,450 @@
+@{
+    ViewData["Title"] = "Thanh toán";
+    var cartItems = ViewBag.CartItems as List<HairNovaShop.Models.CartItem> ?? new List<HairNovaShop.Models.CartItem>();
+    var subtotal = (decimal)(ViewBag.Subtotal ?? 0);
+    var total = (decimal)(ViewBag.Total ?? subtotal);
+    var userFullName = ViewBag.UserFullName as string ?? "";
+    var userEmail = ViewBag.UserEmail as string ?? "";
+    var userPhone = ViewBag.UserPhone as string ?? "";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
+}
+
+<!-- CHECKOUT -->
+<section class="checkout-section">
+    <div class="container checkout-container">
+
+        <!-- CỘT TRÁI: THÔNG TIN THANH TOÁN -->
+        <div class="checkout-left">
+            <h2 class="checkout-title">THÔNG TIN THANH TOÁN</h2>
+
+            <form id="checkoutForm" class="checkout-form" asp-controller="Checkout" asp-action="PlaceOrder" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="discountAmount" name="discountAmount" value="0" />
+
+                <!-- Chọn địa chỉ từ sổ địa chỉ -->
+                <div class="form-row single" style="margin-bottom: 20px;">
+                    <div class="form-group full-width">
+                        <label for="selectSavedAddress">Chọn địa chỉ đã lưu:</label>
+                        <select id="selectSavedAddress" class="form-control" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                            <option value="">-- Chọn địa chỉ từ sổ địa chỉ --</option>
+                        </select>
+                        <small style="color: #888; font-size: 0.85rem; display: block; margin-top: 5px;">
+                            <i class="fas fa-info-circle"></i> Chọn địa chỉ để tự động điền thông tin
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Họ tên + Tỉnh/TP -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fullname">Họ và tên *</label>
+                        <input type="text" id="fullname" name="fullname" placeholder="Nhập họ và tên" value="@userFullName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="province">Tỉnh/Thành phố *</label>
+                        <select id="province" name="province" required>
+                            <option value="">Chọn Tỉnh/Thành phố</option>
+                            <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                            <option value="Hà Nội">Hà Nội</option>
+                            <option value="Đà Nẵng">Đà Nẵng</option>
+                            <option value="Cần Thơ">Cần Thơ</option>
+                            <option value="Hải Phòng">Hải Phòng</option>
+                            <option value="An Giang">An Giang</option>
+                            <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+                            <option value="Bắc Giang">Bắc Giang</option>
+                            <option value="Bắc Kạn">Bắc Kạn</option>
+                            <option value="Bạc Liêu">Bạc Liêu</option>
+                            <option value="Bắc Ninh">Bắc Ninh</option>
+                            <option value="Bến Tre">Bến Tre</option>
+                            <option value="Bình Định">Bình Định</option>
+                            <option value="Bình Dương">Bình Dương</option>
+                            <option value="Bình Phước">Bình Phước</option>
+                            <option value="Bình Thuận">Bình Thuận</option>
+                            <option value="Cà Mau">Cà Mau</option>
+                            <option value="Cao Bằng">Cao Bằng</option>
+                            <option value="Đắk Lắk">Đắk Lắk</option>
+                            <option value="Đắk Nông">Đắk Nông</option>
+                            <option value="Điện Biên">Điện Biên</option>
+                            <option value="Đồng Nai">Đồng Nai</option>
+                            <option value="Đồng Tháp">Đồng Tháp</option>
+                            <option value="Gia Lai">Gia Lai</option>
+                            <option value="Hà Giang">Hà Giang</option>
+                            <option value="Hà Nam">Hà Nam</option>
+                            <option value="Hà Tĩnh">Hà Tĩnh</option>
+                            <option value="Hải Dương">Hải Dương</option>
+                            <option value="Hậu Giang">Hậu Giang</option>
+                            <option value="Hòa Bình">Hòa Bình</option>
+                            <option value="Hưng Yên">Hưng Yên</option>
+                            <option value="Khánh Hòa">Khánh Hòa</option>
+                            <option value="Kiên Giang">Kiên Giang</option>
+                            <option value="Kon Tum">Kon Tum</option>
+                            <option value="Lai Châu">Lai Châu</option>
+                            <option value="Lâm Đồng">Lâm Đồng</option>
+                            <option value="Lạng Sơn">Lạng Sơn</option>
+                            <option value="Lào Cai">Lào Cai</option>
+                            <option value="Long An">Long An</option>
+                            <option value="Nam Định">Nam Định</option>
+                            <option value="Nghệ An">Nghệ An</option>
+                            <option value="Ninh Bình">Ninh Bình</option>
+                            <option value="Ninh Thuận">Ninh Thuận</option>
+                            <option value="Phú Thọ">Phú Thọ</option>
+                            <option value="Phú Yên">Phú Yên</option>
+                            <option value="Quảng Bình">Quảng Bình</option>
+                            <option value="Quảng Nam">Quảng Nam</option>
+                            <option value="Quảng Ngãi">Quảng Ngãi</option>
+                            <option value="Quảng Ninh">Quảng Ninh</option>
+                            <option value="Quảng Trị">Quảng Trị</option>
+                            <option value="Sóc Trăng">Sóc Trăng</option>
+                            <option value="Sơn La">Sơn La</option>
+                            <option value="Tây Ninh">Tây Ninh</option>
+                            <option value="Thái Bình">Thái Bình</option>
+                            <option value="Thái Nguyên">Thái Nguyên</option>
+                            <option value="Thanh Hóa">Thanh Hóa</option>
+                            <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+                            <option value="Tiền Giang">Tiền Giang</option>
+                            <option value="Trà Vinh">Trà Vinh</option>
+                            <option value="Tuyên Quang">Tuyên Quang</option>
+                            <option value="Vĩnh Long">Vĩnh Long</option>
+                            <option value="Vĩnh Phúc">Vĩnh Phúc</option>
+                            <option value="Yên Bái">Yên Bái</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Phường/Xã + Địa chỉ -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ward">Phường/Xã *</label>
+                        <select id="ward" name="ward" required>
+                            <option value="">Chọn Phường/Xã</option>
+                            <option value="Phường 1">Phường 1</option>
+                            <option value="Phường 2">Phường 2</option>
+                            <option value="Phường 3">Phường 3</option>
+                            <option value="Phường 4">Phường 4</option>
+                            <option value="Phường 5">Phường 5</option>
+                            <option value="Xã 1">Xã 1</option>
+                            <option value="Xã 2">Xã 2</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Địa chỉ *</label>
+                        <input type="text" id="address" name="address" placeholder="Nhập địa chỉ cụ thể. Số nhà, đường..." required />
+                    </div>
+                </div>
+
+                <!-- SĐT + Email -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại *</label>
+                        <input type="tel" id="phone" name="phone" placeholder="Nhập số điện thoại" value="@userPhone" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Địa chỉ email *</label>
+                        <input type="email" id="email" name="email" placeholder="Nhập địa chỉ email" value="@userEmail" required />
+                    </div>
+                </div>
+
+                <!-- Nhận email KM -->
+                <div class="form-row single">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="promoEmail" name="promoEmail" value="true" />
+                        Tôi muốn nhận email khuyến mãi và thông tin sản phẩm
+                    </label>
+                </div>
+
+                <!-- Giao hàng đến địa chỉ khác -->
+                <div class="form-row single">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="shipOther" name="shipOther" value="true" />
+                        Giao hàng đến địa chỉ khác?
+                    </label>
+                </div>
+
+                <!-- BLOCK ĐỊA CHỈ KHÁC (ẨN/HIỆN BẰNG JS) -->
+                <div id="shipping-other-block" class="shipping-other hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="shipName">Tên đầy đủ của người nhận *</label>
+                            <input type="text" id="shipName" name="shipName" placeholder="Tên đầy đủ của người nhận" />
+                        </div>
+                        <div class="form-group">
+                            <label for="shipProvince">Tỉnh/Thành phố *</label>
+                            <select id="shipProvince" name="shipProvince">
+                                <option value="">Chọn Tỉnh/Thành phố</option>
+                                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                <option value="Hà Nội">Hà Nội</option>
+                                <option value="Đà Nẵng">Đà Nẵng</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="shipWard">Phường/Xã *</label>
+                            <select id="shipWard" name="shipWard">
+                                <option value="">Chọn Phường/Xã</option>
+                                <option value="Phường 1">Phường 1</option>
+                                <option value="Phường 2">Phường 2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="shipAddress">Địa chỉ *</label>
+                            <input type="text" id="shipAddress" name="shipAddress" placeholder="Nhập địa chỉ cụ thể. Số nhà, đường..." />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="shipPhone">Số điện thoại người nhận (tuỳ chọn)</label>
+                            <input type="tel" id="shipPhone" name="shipPhone" placeholder="Số điện thoại người nhận" />
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <input disabled placeholder="Thông tin thêm (tùy chọn)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ghi chú đơn hàng -->
+                <div class="form-row single">
+                    <div class="form-group full-width">
+                        <label for="note">Ghi chú đơn hàng (tuỳ chọn)</label>
+                        <textarea id="note" name="note" rows="3" placeholder="Ghi chú về đơn hàng, ví dụ: thời gian hay địa điểm giao hàng chi tiết hơn."></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- CỘT PHẢI: ĐƠN HÀNG CỦA BẠN -->
+        <div class="checkout-right">
+            <h2 class="checkout-title">ĐƠN HÀNG CỦA BẠN</h2>
+            <!-- VOUCHER ĐẶT Ở ĐÂY -->
+            <div class="voucher-box">
+                <label for="voucher">Mã giảm giá</label>
+                <div class="voucher-row">
+                    <input type="text" id="voucher" name="voucherCode" placeholder="Nhập mã voucher nếu có" />
+                    <button type="button" class="btn btn-primary btn-apply">ÁP DỤNG</button>
+                </div>
+                <p class="voucher-message" id="voucherMsg"></p>
+            </div>
+            <div class="order-summary">
+                <div class="order-header">
+                    <span>SẢN PHẨM</span>
+                    <span>TẠM TÍNH</span>
+                </div>
+
+                @foreach (var item in cartItems)
+                {
+                    <div class="order-item">
+                        <div class="order-item-name">
+                            @item.ProductName @(!string.IsNullOrEmpty(item.Capacity) ? $"({item.Capacity})" : "") × @item.Quantity
+                        </div>
+                        <div class="order-item-price">@item.Subtotal.ToString("N0") đ</div>
+                    </div>
+                }
+
+                <div class="order-row">
+                    <span>Tạm tính</span>
+                    <span>@subtotal.ToString("N0") đ</span>
+                </div>
+
+                <div class="order-row">
+                    <span>Tổng</span>
+                    <span class="order-total">@total.ToString("N0") đ</span>
+                </div>
+            </div>
+
+            <!-- PHƯƠNG THỨC THANH TOÁN -->
+            <div class="payment-methods">
+                <h3>Phương thức thanh toán</h3>
+
+                <label class="radio-row">
+                    <input type="radio" name="payment" value="cod" checked />
+                    <span>Thanh toán khi nhận hàng</span>
+                </label>
+
+                <label class="radio-row">
+                    <input type="radio" name="payment" value="bank" />
+                    <span>Chuyển khoản Ngân hàng (Quét mã QR Code)</span>
+                </label>
+
+                <label class="radio-row">
+                    <input type="radio" name="payment" value="momo" />
+                    <span>Quét mã Ví MoMo</span>
+                </label>
+
+                <label class="radio-row">
+                    <input type="radio" name="payment" value="vnpay" />
+                    <span>Quét mã VNPAY</span>
+                </label>
+            </div>
+
+            <div class="review-consent">
+                <label class="checkbox-inline">
+                    <input type="checkbox" />
+                    Bạn có muốn được mời đánh giá đơn hàng của mình không? Đánh dấu vào đây để nhận tin nhắn từ HairNova kèm theo biểu mẫu đánh giá.
+                </label>
+            </div>
+
+            <button type="submit" form="checkoutForm" class="btn btn-primary btn-full">ĐẶT HÀNG</button>
+
+            <p class="checkout-note">
+                Dữ liệu cá nhân của bạn sẽ được sử dụng để xử lý đơn hàng, hỗ trợ trải nghiệm của bạn trên toàn bộ trang web này và cho các mục đích khác được mô tả trong chính sách riêng tư.
+            </p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/checkout.js" asp-append-version="true"></script>
+    <script>
+        // Load saved addresses when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedAddresses();
+        });
+
+        async function loadSavedAddresses() {
+            try {
+                const response = await fetch('/Checkout/GetSavedAddresses');
+                
+                if (!response.ok) {
+                    console.error('Failed to load addresses:', response.status);
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Addresses loaded:', result);
+                
+                const select = document.getElementById('selectSavedAddress');
+                if (!select) {
+                    console.error('Select element not found');
+                    return;
+                }
+                
+                if (!result.success) {
+                    console.log('No addresses found or user not logged in');
+                    return;
+                }
+                
+                if (!result.addresses || result.addresses.length === 0) {
+                    console.log('No saved addresses available');
+                    return;
+                }
+
+                // Clear existing options except the first one
+                while (select.children.length > 1) {
+                    select.removeChild(select.lastChild);
+                }
+
+                // Add address options
+                result.addresses.forEach((address, index) => {
+                    const option = document.createElement('option');
+                    const addressText = `${address.customerName} - ${address.shippingAddress}${address.shippingProvince ? ', ' + address.shippingProvince : ''}${address.shippingWard ? ', ' + address.shippingWard : ''}`;
+                    option.value = JSON.stringify(address);
+                    option.textContent = addressText;
+                    select.appendChild(option);
+                });
+
+                // Add event listener for address selection (only once)
+                if (!select.hasAttribute('data-listener-added')) {
+                    select.setAttribute('data-listener-added', 'true');
+                    select.addEventListener('change', function() {
+                        const selectedValue = this.value;
+                        if (selectedValue) {
+                            try {
+                                const address = JSON.parse(selectedValue);
+                                fillCheckoutForm(address);
+                            } catch (e) {
+                                console.error('Error parsing address:', e);
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading saved addresses:', error);
+            }
+        }
+
+        function fillCheckoutForm(address) {
+            // Fill main address fields
+            const fullnameInput = document.getElementById('fullname');
+            if (fullnameInput && address.customerName) {
+                fullnameInput.value = address.customerName;
+            }
+
+            const provinceSelect = document.getElementById('province');
+            if (provinceSelect && address.shippingProvince) {
+                provinceSelect.value = address.shippingProvince;
+            }
+
+            const wardSelect = document.getElementById('ward');
+            if (wardSelect && address.shippingWard) {
+                wardSelect.value = address.shippingWard;
+            }
+
+            const addressInput = document.getElementById('address');
+            if (addressInput && address.shippingAddress) {
+                addressInput.value = address.shippingAddress;
+            }
+
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput && address.customerPhone) {
+                phoneInput.value = address.customerPhone;
+            }
+
+            const emailInput = document.getElementById('email');
+            if (emailInput && address.customerEmail) {
+                emailInput.value = address.customerEmail;
+            }
+        }
+
+        // Cập nhật payment method và các field vào form khi submit
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            const selectedPayment = document.querySelector('input[name="payment"]:checked');
+            if (selectedPayment) {
+                // Remove existing hidden inputs if any
+                const existingPaymentInput = this.querySelector('input[name="paymentMethod"]');
+                if (existingPaymentInput) existingPaymentInput.remove();
+                
+                const paymentInput = document.createElement('input');
+                paymentInput.type = 'hidden';
+                paymentInput.name = 'paymentMethod';
+                paymentInput.value = selectedPayment.value;
+                this.appendChild(paymentInput);
+                
+                const shipOtherCheckbox = document.getElementById('shipOther');
+                const existingShipOtherInput = this.querySelector('input[name="shipOther"]');
+                if (existingShipOtherInput) existingShipOtherInput.remove();
+                
+                if (shipOtherCheckbox && shipOtherCheckbox.checked) {
+                    const shipOtherInput = document.createElement('input');
+                    shipOtherInput.type = 'hidden';
+                    shipOtherInput.name = 'shipOther';
+                    shipOtherInput.value = 'true';
+                    this.appendChild(shipOtherInput);
+                }
+                
+                const voucherCodeInput = document.getElementById('voucher');
+                const existingVoucherInput = this.querySelector('input[name="voucherCode"]');
+                if (existingVoucherInput) existingVoucherInput.remove();
+                
+                if (voucherCodeInput && voucherCodeInput.value.trim()) {
+                    const voucherInput = document.createElement('input');
+                    voucherInput.type = 'hidden';
+                    voucherInput.name = 'voucherCode';
+                    voucherInput.value = voucherCodeInput.value.trim().toUpperCase();
+                    this.appendChild(voucherInput);
+                }
+            }
+        });
+        
+        // Lưu tổng tiền ban đầu
+        const originalTotalSpan = document.querySelector('.order-total');
+        if (originalTotalSpan) {
+            window.originalTotal = parseFloat(originalTotalSpan.textContent.replace(/[^\d]/g, '')) || @total;
+        }
+    </script>
+}

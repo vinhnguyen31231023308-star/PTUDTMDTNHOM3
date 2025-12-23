@@ -1,0 +1,301 @@
+@{
+    ViewData["Title"] = "Giỏ hàng - HairNovaShop";
+    var cartItems = ViewBag.CartItems as List<HairNovaShop.Models.CartItem> ?? new List<HairNovaShop.Models.CartItem>();
+    var recommendedProducts = ViewBag.RecommendedProducts as List<HairNovaShop.Models.Product> ?? new List<HairNovaShop.Models.Product>();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+}
+
+<!-- GIỎ HÀNG -->
+<section class="cart-section">
+    <div class="container cart-container">
+        <!-- TRÁI: SẢN PHẨM -->
+        <div class="cart-left">
+            <h1 class="cart-title">Giỏ hàng</h1>
+
+            @if (cartItems.Any())
+            {
+                <!-- HEADER BẢNG -->
+                <div class="cart-table-header">
+                    <span class="col-product">Sản phẩm</span>
+                    <span class="col-price">Giá tiền</span>
+                    <span class="col-qty">Số lượng</span>
+                    <span class="col-subtotal">Thành tiền</span>
+                </div>
+
+                @foreach (var item in cartItems)
+                {
+                    <div class="cart-item" data-id="@item.ProductId" data-capacity="@(item.Capacity ?? "")">
+                        <div class="col-product">
+                            <img src="@item.ProductImage" alt="@item.ProductName" class="cart-thumb" onerror="this.src='@Url.Content("~/images/imgcart/placeholder.png")'" />
+                            <div class="cart-prod-info">
+                                <div class="cart-prod-name">@item.ProductName @(!string.IsNullOrEmpty(item.Capacity) ? $"({item.Capacity})" : "")</div>
+                                <a href="#" class="cart-remove">Xóa</a>
+                            </div>
+                        </div>
+                        <div class="col-price">
+                            <span class="price" data-price="@item.Price">@item.Price.ToString("N0") đ</span>
+                        </div>
+                        <div class="col-qty">
+                            <div class="qty-control">
+                                <button class="qty-btn minus">-</button>
+                                <input type="number" class="qty-input" value="@item.Quantity" min="1" />
+                                <button class="qty-btn plus">+</button>
+                            </div>
+                        </div>
+                        <div class="col-subtotal">
+                            <span class="subtotal">@item.Subtotal.ToString("N0") đ</span>
+                        </div>
+                    </div>
+                }
+
+                <!-- DÒNG THÔNG BÁO + XEM THÊM VOUCHER -->
+                <div class="cart-info-row">
+                    <span>Mua thêm để được giảm nhiều hơn.</span>
+                    <button type="button" class="link-button" id="toggleVoucherList">Xem thêm voucher</button>
+                </div>
+
+                <!-- DANH SÁCH VOUCHER (ẨN/HIỆN) -->
+                <div class="voucher-list hidden" id="voucherList">
+                    <div class="voucher-item" data-code="HAIR10" data-type="percent" data-value="10">
+                        <div class="voucher-main">
+                            <div class="voucher-code">HAIR10</div>
+                            <div class="voucher-desc">Giảm 10% cho đơn hàng</div>
+                        </div>
+                        <button class="btn-copy" type="button">Copy</button>
+                    </div>
+                    <div class="voucher-item" data-code="HAIR20" data-type="percent" data-value="20">
+                        <div class="voucher-main">
+                            <div class="voucher-code">HAIR20</div>
+                            <div class="voucher-desc">Giảm 20% cho đơn hàng</div>
+                        </div>
+                        <button class="btn-copy" type="button">Copy</button>
+                    </div>
+                    <div class="voucher-item" data-code="HAIR15K" data-type="amount" data-value="15000">
+                        <div class="voucher-main">
+                            <div class="voucher-code">HAIR15K</div>
+                            <div class="voucher-desc">Giảm 15.000 đ</div>
+                        </div>
+                        <button class="btn-copy" type="button">Copy</button>
+                    </div>
+                    <div class="voucher-item" data-code="HAIR50K" data-type="amount" data-value="50000">
+                        <div class="voucher-main">
+                            <div class="voucher-code">HAIR50K</div>
+                            <div class="voucher-desc">Giảm 50.000 đ</div>
+                        </div>
+                        <button class="btn-copy" type="button">Copy</button>
+                    </div>
+                    <p class="voucher-note">Copy mã rồi dán vào ô "Mã ưu đãi" bên phải để áp dụng.</p>
+                </div>
+
+                <!-- GIẢM PHÍ VẬN CHUYỂN -->
+                <div class="cart-info-row cart-shipping-note">
+                    <span>Giảm 500.000đ phí vận chuyển đơn từ 0đ.</span>
+                    <a href="#" class="link-button">Tìm hiểu thêm</a>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <p style="font-size: 1.2rem; color: var(--text-gray); margin-bottom: 20px;">Giỏ hàng của bạn đang trống</p>
+                    <a asp-controller="Shop" asp-action="Index" class="btn btn-primary">Tiếp tục mua sắm</a>
+                </div>
+            }
+        </div>
+
+        @if (cartItems.Any())
+        {
+            <!-- PHẢI: MÃ ƯU ĐÃI + HÓA ĐƠN -->
+            <div class="cart-right">
+                <div class="coupon-box">
+                    <h3 class="coupon-title">Mã ưu đãi</h3>
+                    <input type="text" id="voucherInput" placeholder="Nhập mã giảm giá" />
+                    <button type="button" class="btn btn-primary btn-apply-coupon" id="applyVoucherBtn">Áp dụng</button>
+                    <button type="button" class="link-button small" id="showAllVoucherRight">Xem các mã giảm giá hiện có</button>
+                    <p class="voucher-message" id="voucherMessage"></p>
+                </div>
+
+                <div class="bill-box">
+                    <h3>Hóa đơn của bạn</h3>
+                    <div class="bill-row">
+                        <span>Tạm tính:</span>
+                        <span id="billSubtotal">0 đ</span>
+                    </div>
+                    <div class="bill-row">
+                        <span>Giảm giá:</span>
+                        <span id="billDiscount">0 đ</span>
+                    </div>
+                    <div class="bill-row bill-total">
+                        <span>Tổng cộng:</span>
+                        <span id="billTotal">0 đ</span>
+                    </div>
+                    <p class="bill-note">(Đã bao gồm VAT)</p>
+                    <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary btn-full">Tiến hành đặt hàng</a>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- HÀNG ICON DỊCH VỤ -->
+<section class="service-strip">
+    <div class="container service-grid">
+        <div class="service-item">
+            <img src="~/images/imgcart/sb1.png" alt="Thanh toán khi nhận hàng" onerror="this.style.display='none'" />
+            <p>THANH TOÁN KHI NHẬN HÀNG</p>
+        </div>
+        <div class="service-item">
+            <img src="~/images/imgcart/sb2.png" alt="Giao nhanh miễn phí" onerror="this.style.display='none'" />
+            <p>GIAO HÀNG MIỄN PHÍ</p>
+        </div>
+        <div class="service-item">
+            <img src="~/images/imgcart/sb3.png" alt="30 ngày đổi trả miễn phí" onerror="this.style.display='none'" />
+            <p>30 NGÀY ĐỔI TRẢ MIỄN PHÍ</p>
+        </div>
+        <div class="service-item">
+            <img src="~/images/imgcart/sb4.png" alt="Thương hiệu uy tín" onerror="this.style.display='none'" />
+            <p>THƯƠNG HIỆU UY TÍN TOÀN CẦU</p>
+        </div>
+    </div>
+</section>
+
+<!-- STRIP HOTLINE / CHI NHÁNH -->
+<section class="cart-bottom-strip">
+    <div class="container bottom-strip-grid">
+        <div class="bottom-box">
+            <p class="bottom-title">HOTLINE CSKH</p>
+            <p class="bottom-main">0343-018-741</p>
+            <p class="bottom-sub">Miễn phí cước gọi</p>
+        </div>
+        <div class="bottom-box">
+            <p class="bottom-title">TÌM CHI NHÁNH</p>
+            <p class="bottom-main">HỆ THỐNG HAIRNOVA</p>
+            <p class="bottom-sub">Xem địa chỉ cửa hàng gần bạn</p>
+        </div>
+    </div>
+</section>
+
+<!-- GỢI Ý SẢN PHẨM -->
+@if (recommendedProducts.Any())
+{
+    <section class="recommend-section">
+        <div class="container">
+            <!-- TAB HEADER -->
+            <div class="recommend-tabs">
+                <button class="recommend-tab active" data-target="tab-more">Bạn có cần thêm?</button>
+                <button class="recommend-tab" data-target="tab-deal">Deal sốc cho bạn</button>
+                <a asp-controller="Shop" asp-action="Index" class="recommend-view-all">Xem Tất Cả &gt;</a>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="recommend-content">
+                <!-- TAB 1: BẠN CÓ CẦN THÊM? -->
+                <div class="recommend-panel active" id="tab-more">
+                    <div class="product-slider">
+                        <button class="slider-arrow prev" type="button">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <div class="product-track" id="moreTrack">
+                            @foreach (var product in recommendedProducts)
+                            {
+                                <div class="product-card">
+                                    <a asp-controller="Product" asp-action="Detail" asp-route-id="@product.Id" class="product-link">
+                                        <img src="@(product.MainImage ?? Url.Content("~/images/placeholder.png"))" alt="@product.Name" onerror="this.src='@Url.Content("~/images/placeholder.png")'" />
+                                        <h4 class="product-name">@product.Name</h4>
+                                        <div class="product-price-row">
+                                            <span class="product-price-current">@product.Price.ToString("N0") đ</span>
+                                            @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
+                                            {
+                                                <span class="product-price-old">@product.OriginalPrice.Value.ToString("N0") đ</span>
+                                                var discountPercent = (int)Math.Round((1 - (double)product.Price / (double)product.OriginalPrice.Value) * 100);
+                                                <span class="product-discount-badge">-@discountPercent%</span>
+                                            }
+                                        </div>
+                                        <div class="product-meta-row">
+                                            @if (product.Rating > 0)
+                                            {
+                                                <span class="product-rating"><span class="star">★</span> @product.Rating.ToString("F1")</span>
+                                            }
+                                            <span class="product-sold">Đã bán @(product.ReviewCount + 50)</span>
+                                        </div>
+                                        <div class="product-progress">
+                                            <div class="product-progress-bar" style="--sold-rate: @(Math.Min(0.95, (product.ReviewCount + 50) / 100.0));"></div>
+                                        </div>
+                                    </a>
+                                    <div class="product-actions">
+                                        <button class="product-action-btn secondary" type="button" onclick="event.preventDefault(); addToCart(@product.Id);">Thêm giỏ hàng</button>
+                                        <button class="product-action-btn primary" type="button" onclick="event.preventDefault(); window.location.href='@Url.Action("Detail", "Product", new { id = product.Id })'">Mua ngay</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <button class="slider-arrow next" type="button">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: DEAL SỐC -->
+                <div class="recommend-panel" id="tab-deal">
+                    <div class="deal-banner-grid">
+                        <a asp-controller="Shop" asp-action="Index" class="deal-banner big">
+                            <img src="~/images/imgcart/bn1.png" alt="Deal sốc tại HairNova" onerror="this.style.display='none'" />
+                        </a>
+                        <a asp-controller="Shop" asp-action="Index" class="deal-banner">
+                            <img src="~/images/imgcart/bn2.png" alt="Giảm giá 30%" onerror="this.style.display='none'" />
+                        </a>
+                        <a asp-controller="Shop" asp-action="Index" class="deal-banner">
+                            <img src="~/images/imgcart/bn3.png" alt="Mua 2 tặng 1" onerror="this.style.display='none'" />
+                        </a>
+                        <a asp-controller="Shop" asp-action="Index" class="deal-banner">
+                            <img src="~/images/imgcart/bn4.png" alt="Ưu đãi Noel" onerror="this.style.display='none'" />
+                        </a>
+                        <a asp-controller="Shop" asp-action="Index" class="deal-banner">
+                            <img src="~/images/imgcart/bn5.png" alt="Miễn phí vận chuyển" onerror="this.style.display='none'" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    @Html.AntiForgeryToken()
+    <script src="~/js/cart.js" asp-append-version="true"></script>
+    <script>
+        // Function to add to cart from cart page
+        function addToCart(productId) {
+            const formData = new FormData();
+            formData.append('quantity', 1);
+            
+            fetch('/Cart/Add/' + productId, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart badge
+                    const cartBadge = document.querySelector('.cart-badge');
+                    if (cartBadge) {
+                        cartBadge.textContent = data.cartCount || 0;
+                    }
+                    alert(data.message || 'Đã thêm sản phẩm vào giỏ hàng!');
+                    // Reload page to show updated cart
+                    location.reload();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thêm sản phẩm!');
+            });
+        }
+    </script>
+}

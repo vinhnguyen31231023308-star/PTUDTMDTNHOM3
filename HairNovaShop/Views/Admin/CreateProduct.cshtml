@@ -1,0 +1,246 @@
+@model HairNovaShop.Models.Product
+@{
+    ViewData["Title"] = "Thêm sản phẩm mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-page-header">
+    <h1>Thêm sản phẩm mới</h1>
+    <p>Tạo sản phẩm mới trong hệ thống</p>
+</div>
+
+<div class="admin-card">
+    <form asp-action="CreateProduct" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <label asp-for="Name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                <input asp-for="Name" class="form-control" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="CategoryId" class="form-label">Danh mục</label>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
+                    <option value="">-- Chọn danh mục --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Price" class="form-label">Giá bán <span class="text-danger">*</span></label>
+                <input asp-for="Price" type="number" step="0.01" class="form-control" required />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="OriginalPrice" class="form-label">Giá gốc</label>
+                <input asp-for="OriginalPrice" type="number" step="0.01" class="form-control" />
+                <span asp-validation-for="OriginalPrice" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="SKU" class="form-label">SKU</label>
+                <input asp-for="SKU" class="form-control" />
+                <span asp-validation-for="SKU" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Stock" class="form-label">Tồn kho (tổng - tự động tính từ variants)</label>
+                <input asp-for="Stock" type="number" class="form-control" value="0" readonly />
+                <small class="text-muted">Tồn kho sẽ được tính tự động từ các variants bên dưới</small>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Brand" class="form-label">Thương hiệu</label>
+                <input asp-for="Brand" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Origin" class="form-label">Xuất xứ</label>
+                <input asp-for="Origin" class="form-control" />
+            </div>
+        </div>
+
+        <!-- Product Variants Management -->
+        <div class="mb-3">
+            <label class="form-label">Quản lý tồn kho theo dung tích</label>
+            <div id="variants-container">
+                <div class="variant-item mb-2 p-3 border rounded">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control variant-capacity" placeholder="Dung tích (VD: 250ml)" />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" step="0.01" class="form-control variant-price" placeholder="Giá (để trống dùng giá mặc định)" />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" class="form-control variant-stock" placeholder="Tồn kho" value="0" min="0" />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger btn-sm remove-variant">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm mt-2" id="add-variant">
+                <i class="fas fa-plus me-1"></i>Thêm dung tích
+            </button>
+            <input type="hidden" id="stockByCapacity" name="StockByCapacity" />
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="Tags" class="form-label">Tags (phân cách bằng dấu phẩy)</label>
+                <input asp-for="Tags" class="form-control" placeholder="VD: Cocoon, Serums, Vitamin C" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ExpiryDate" class="form-label">Hạn sử dụng</label>
+                <input asp-for="ExpiryDate" class="form-control" placeholder="VD: 3 năm kể từ ngày sản xuất" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Mô tả ngắn</label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="DetailedDescription" class="form-label">Mô tả chi tiết</label>
+            <textarea asp-for="DetailedDescription" class="form-control" rows="6"></textarea>
+            <span asp-validation-for="DetailedDescription" class="text-danger"></span>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="mainImage" class="form-label">Hình ảnh chính</label>
+                <input type="file" name="mainImage" id="mainImage" class="form-control" accept="image/*" />
+            </div>
+            <div class="col-md-6">
+                <label for="images" class="form-label">Hình ảnh phụ (có thể chọn nhiều)</label>
+                <input type="file" name="images" id="images" class="form-control" accept="image/*" multiple />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                    <label asp-for="IsActive" class="form-check-label">Hoạt động</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input asp-for="IsFeatured" class="form-check-input" type="checkbox" />
+                    <label asp-for="IsFeatured" class="form-check-label">Nổi bật</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input asp-for="IsNew" class="form-check-input" type="checkbox" />
+                    <label asp-for="IsNew" class="form-check-label">Sản phẩm mới</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input asp-for="OnSale" class="form-check-input" type="checkbox" />
+                    <label asp-for="OnSale" class="form-check-label">Đang giảm giá</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn admin-btn-primary" onclick="updateVariantsBeforeSubmit(event)">
+                <i class="fas fa-save me-2"></i>Tạo sản phẩm
+            </button>
+            <a asp-action="Products" class="btn btn-secondary">
+                <i class="fas fa-times me-2"></i>Hủy
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Add new variant row
+        document.getElementById('add-variant')?.addEventListener('click', function() {
+            const container = document.getElementById('variants-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'variant-item mb-2 p-3 border rounded';
+            newRow.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control variant-capacity" placeholder="Dung tích (VD: 250ml)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" step="0.01" class="form-control variant-price" placeholder="Giá (để trống dùng giá mặc định)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control variant-stock" placeholder="Tồn kho" value="0" min="0" />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm remove-variant">Xóa</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newRow);
+            attachRemoveHandler(newRow);
+        });
+
+        // Remove variant row
+        function attachRemoveHandler(row) {
+            row.querySelector('.remove-variant')?.addEventListener('click', function() {
+                row.remove();
+                updateVariantsAndStock();
+            });
+        }
+
+        // Update variants JSON and total stock before submit
+        function updateVariantsBeforeSubmit(event) {
+            updateVariantsAndStock();
+        }
+
+        function updateVariantsAndStock() {
+            const variants = [];
+            const variantItems = document.querySelectorAll('.variant-item');
+            let totalStock = 0;
+
+            variantItems.forEach(item => {
+                const capacity = item.querySelector('.variant-capacity')?.value?.trim();
+                const priceInput = item.querySelector('.variant-price')?.value?.trim();
+                const stockInput = item.querySelector('.variant-stock')?.value?.trim();
+
+                if (capacity) {
+                    const stock = parseInt(stockInput) || 0;
+                    totalStock += stock;
+                    variants.push({
+                        Capacity: capacity,
+                        Price: priceInput ? parseFloat(priceInput) : null,
+                        Stock: stock
+                    });
+                }
+            });
+
+            // Update hidden field
+            document.getElementById('stockByCapacity').value = JSON.stringify(variants);
+            // Update total stock field
+            document.querySelector('input[name="Stock"]').value = totalStock;
+        }
+
+        // Attach remove handlers to existing rows
+        document.querySelectorAll('.variant-item').forEach(attachRemoveHandler);
+
+        // Update on input change
+        document.getElementById('variants-container')?.addEventListener('input', function(e) {
+            if (e.target.classList.contains('variant-capacity') || 
+                e.target.classList.contains('variant-price') || 
+                e.target.classList.contains('variant-stock')) {
+                updateVariantsAndStock();
+            }
+        });
+    </script>
+}
